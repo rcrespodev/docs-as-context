@@ -59,9 +59,6 @@ root/
 │   │   ├── tasks-manager.mdc # Task manager rules
 │   │   ├── tasks-guidelines.mdc # Task guidelines rules
 │   │   ├── tasks-index.mdc # Task index rules
-│   ├── context/            # AI context rules (e.g., context-provider.mdc)
-│   │   ├── context-provider.mdc # Context provider rules
-│   │   ├── knowledge-base.mdc # Knowledge base rules
 │   └── index.mdc           # Main index of all rules
 ├── docs/                   # Generated documentation (e.g., task-feature-login.md)
 │   ├── tasks/              # Task files (e.g., task-feature-login.md)
