@@ -20,10 +20,10 @@
 - [user-stories.mdc](./domain/user-stories.mdc) - Template for writing user stories
 
 ## Stack Rules
-- [nestjs-api-development.mdc](./../stacks/nestjs-api-development.mdc) - NestJS API development patterns and guidelines
-- [nextjs-app-styles.mdc](./../stacks/nextjs-app-styles.mdc) - Style guidelines for the Next.js web application
-- [prisma-rules.mdc](./../stacks/prisma-rules.mdc) - Prisma models structure and usage guidelines
-- [jest-api-testing.mdc](./../stacks/jest-api-testing.mdc) - API Testing best practices and how to run specific test files
+- [nestjs-api-development.mdc](./stacks/nestjs-api-development.mdc) - NestJS API development patterns and guidelines
+- [nextjs-app-styles.mdc](./stacks/nextjs-app-styles.mdc) - Style guidelines for the Next.js web application
+- [prisma-rules.mdc](./stacks/prisma-rules.mdc) - Prisma models structure and usage guidelines
+- [jest-api-testing.mdc](./stacks/jest-api-testing.mdc) - API Testing best practices and how to run specific test files
 
 ## Task Rules
 *No specific task rules found in the current structure*
