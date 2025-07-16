@@ -1,0 +1,525 @@
+---
+description: Standards for writing clean, maintainable, and high-quality code across all programming languages and frameworks.
+alwaysApply: true
+---
+
+# Code Quality Standards
+
+## Overview
+This rule defines universal standards for writing clean, maintainable, and high-quality code across all programming languages and frameworks.
+
+## Core Principles
+
+### 1. Readability
+- Write code that is easy to read and understand
+- Use meaningful variable and function names
+- Add appropriate comments for complex logic
+- Use consistent formatting and indentation
+
+### 2. Maintainability
+- Follow the Single Responsibility Principle
+- Dont repeat yourself! (DRY principle)
+- Keep functions and classes small and focused
+- Each function, method, class, or interface should have a single, clear purpose
+- Use clear and concise code
+- Use clear and semantic names for variables, functions, classes, and interfaces
+- Use clear abstractions and interfaces to avoid code duplication
+
+### 3. Performance
+- Write efficient algorithms and data structures
+- Avoid unnecessary computations
+- Consider memory usage and garbage collection
+- Use appropriate data structures
+
+### 4. Security
+- Validate all inputs
+- Sanitize data before processing
+- Use secure coding practices
+- Follow the principle of least privilege
+
+## Naming Conventions
+
+### Variables and Functions
+```typescript
+// ✅ Good: Clear, descriptive names
+const userProfile = getUserProfile(userId);
+const isUserAuthenticated = checkUserAuthentication(user);
+const calculateTotalPrice = (items) => { /* ... */ };
+
+// ❌ Bad: Unclear or abbreviated names
+const up = getUserProfile(uid);
+const flag = checkAuth(user);
+const calc = (items) => { /* ... */ };
+```
+
+### Classes and Interfaces
+```typescript
+// ✅ Good: PascalCase for classes, descriptive names
+class UserAuthenticationService { /* ... */ }
+interface UserProfileData { /* ... */ }
+
+// ❌ Bad: Unclear or generic names
+class Service { /* ... */ }
+interface Data { /* ... */ }
+```
+
+### Constants
+```typescript
+// ✅ Good: SCREAMING_SNAKE_CASE for constants
+const MAX_RETRY_ATTEMPTS = 3;
+const DEFAULT_TIMEOUT_MS = 5000;
+const API_BASE_URL = 'https://api.example.com';
+
+// ❌ Bad: Inconsistent naming
+const maxRetries = 3;
+const timeout = 5000;
+```
+
+## Function Design
+
+### Function Length
+- Keep functions under 20-30 lines
+- Break large functions into smaller, focused functions
+- Each function should have a single, clear purpose
+
+```typescript
+// ✅ Good: Small, focused functions
+function validateUserInput(input: UserInput): ValidationResult {
+  const emailValid = validateEmail(input.email);
+  const passwordValid = validatePassword(input.password);
+  return { isValid: emailValid && passwordValid };
+}
+
+// ❌ Bad: Long, complex function
+function processUserData(userData) {
+  // 50+ lines of mixed responsibilities
+}
+```
+
+### Function Parameters
+```typescript
+// ✅ Good: Few parameters, use objects for multiple values
+function createUser(userData: CreateUserRequest): User {
+  // Implementation
+}
+
+// ❌ Bad: Too many parameters
+function createUser(name, email, password, age, address, phone) {
+  // Implementation
+}
+```
+
+### Function early return
+Use always early return to avoid nested if statements.
+
+```typescript
+
+// ✅ Good: Early return
+function createUser(userData: CreateUserRequest): User | Error {
+  if (!userData.name) {
+    return new Error('Name is required');
+  }
+
+  if (!userData.email) {
+    return new Error('Email is required');
+  }
+
+  if (!userData.password) {
+    return new Error('Password is required');
+  }
+  return userData;
+}
+
+// ❌ Bad: Nested if statements
+function createUser(userData: CreateUserRequest): User | Error {
+  if (userData.name) {
+    return userData;
+  } else if (!userData.email) {
+    return new Error('Email is required');
+  } else if (!userData.password) {
+    return new Error('Password is required');
+  }
+  return userData;
+}
+```
+
+### Explicit Return Types
+```typescript
+// ✅ Good: Explicit return types
+const getUserById = (id: string): User | null => {
+  return users.find(user => user.id === id) || null;
+};
+
+const createUser = async (userData: CreateUserRequest): Promise<User> => {
+  return await userService.create(userData);
+};
+
+// ❌ Bad: Implicit return types
+const getUserById = (id: string) => {
+  return users.find(user => user.id === id) || null;
+};
+```
+
+### No Explicit Any
+```typescript
+// ✅ Good: Proper typing
+const processData = (data: unknown): ProcessedData => {
+  if (!isValidData(data)) {
+    throw new Error('Invalid data');
+  }
+  return transformData(data as ValidData);
+};
+
+// ❌ Bad: Using any
+const processData = (data: any): any => {
+  return transformData(data);
+};
+```
+
+### Prefer Interface
+```typescript
+// ✅ Good: Use interfaces for object shapes
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface CreateUserRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+// ❌ Bad: Using type for object shapes
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+```
+
+## Code Organization
+
+### File Structure
+```typescript
+// ✅ Good: Logical organization
+// 1. Imports
+import { Component } from 'react';
+import { useAuth } from '../hooks/useAuth';
+
+// 2. Types/Interfaces
+interface UserProfileProps {
+  userId: string;
+}
+
+// 3. Component/Function
+export function UserProfile({ userId }: UserProfileProps) {
+  // Implementation
+}
+
+// 4. Helper functions (if any)
+function formatUserName(user: User): string {
+  return `${user.firstName} ${user.lastName}`;
+}
+```
+
+### Import Organization
+```typescript
+// ✅ Good: Grouped imports
+// External libraries
+import React from 'react';
+import { useRouter } from 'next/router';
+
+// Internal modules
+import { UserService } from '../services/UserService';
+import { useAuth } from '../hooks/useAuth';
+
+// Types
+import type { User } from '../types/User';
+```
+
+## Error Handling
+
+### Try-Catch Blocks
+```typescript
+// ✅ Good: Specific error handling
+try {
+  const result = await riskyOperation();
+  return result;
+} catch (error) {
+  if (error instanceof NetworkError) {
+    logger.error('Network error occurred', error);
+    throw new UserFriendlyError('Connection failed. Please try again.');
+  }
+  throw error;
+}
+
+// ❌ Bad: Generic error handling
+try {
+  const result = await riskyOperation();
+  return result;
+} catch (error) {
+  console.log(error);
+  return null;
+}
+```
+
+### Null/Undefined Handling
+```typescript
+// ✅ Good: Explicit null checks
+function processUser(user: User | null): string {
+  if (!user) {
+    return 'Unknown user';
+  }
+  return user.name;
+}
+
+// ❌ Bad: Implicit null handling
+function processUser(user: User | null): string {
+  return user.name; // Could throw error
+}
+```
+
+### No Unhandled Promises
+```typescript
+// ✅ Good: Handle all promises
+const processData = async (data: Data): Promise<Result> => {
+  try {
+    const result = await processAsync(data);
+    return result;
+  } catch (error) {
+    logger.error('Failed to process data', error);
+    throw new ProcessingError('Failed to process data');
+  }
+};
+
+// ❌ Bad: Unhandled promise
+const processData = async (data: Data): Promise<Result> => {
+  return await processAsync(data); // Could throw unhandled error
+};
+```
+
+## Performance Guidelines
+
+### Avoid Nested Loops
+```typescript
+// ✅ Good: Use appropriate data structures
+const userMap = new Map(users.map(user => [user.id, user]));
+const result = ids.map(id => userMap.get(id));
+
+// ❌ Bad: Nested loops
+const result = ids.map(id => 
+  users.find(user => user.id === id)
+);
+```
+
+### Memory Management
+```typescript
+// ✅ Good: Clean up resources
+useEffect(() => {
+  const subscription = dataStream.subscribe(handleData);
+  return () => subscription.unsubscribe();
+}, []);
+
+// ❌ Bad: Memory leaks
+useEffect(() => {
+  dataStream.subscribe(handleData);
+  // No cleanup
+}, []);
+```
+
+## Security Best Practices
+
+### Input Validation
+```typescript
+// ✅ Good: Validate all inputs
+function processUserInput(input: unknown): UserInput {
+  if (!isValidUserInput(input)) {
+    throw new ValidationError('Invalid user input');
+  }
+  return input as UserInput;
+}
+
+// ❌ Bad: Trust user input
+function processUserInput(input: any): UserInput {
+  return input; // Dangerous!
+}
+```
+
+### SQL Injection Prevention
+```typescript
+// ✅ Good: Use parameterized queries
+const user = await db.query(
+  'SELECT * FROM users WHERE id = ?',
+  [userId]
+);
+
+// ❌ Bad: String concatenation
+const user = await db.query(
+  `SELECT * FROM users WHERE id = ${userId}`
+);
+```
+
+## Documentation
+
+- Don't write comments that are redundant or unnecessary
+- Don't write comments that are not helpful or accurate
+- Always write comments in the same language as the code
+
+### Code Comments
+```typescript
+// ✅ Good: Explain why, not what
+// Use exponential backoff to handle rate limiting
+const delay = Math.pow(2, attempt) * 1000;
+
+// ❌ Bad: Obvious comments
+const delay = 1000; // Set delay to 1000ms
+```
+
+### Function Documentation
+```typescript
+/**
+ * Creates a new user account with the provided data.
+ * 
+ * @param userData - The user data to create the account with
+ * @returns Promise<User> - The created user object
+ * @throws ValidationError - When user data is invalid
+ * @throws DuplicateUserError - When user already exists
+ */
+async function createUser(userData: CreateUserRequest): Promise<User> {
+  // Implementation
+}
+```
+
+## Edge Cases
+
+### No Magic Numbers
+```typescript
+// ✅ Good: Named constants
+const MAX_LOGIN_ATTEMPTS = 3;
+const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000;
+const MIN_PASSWORD_LENGTH = 8;
+
+if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+  lockAccount();
+}
+
+// ❌ Bad: Magic numbers
+if (loginAttempts >= 3) {
+  lockAccount();
+}
+```
+
+### No Hardcoded Strings or Numbers
+```typescript
+// ✅ Good: Use constants for strings
+const ERROR_MESSAGES = {
+  INVALID_EMAIL: 'Please enter a valid email address',
+  PASSWORD_TOO_SHORT: 'Password must be at least 8 characters',
+  USER_NOT_FOUND: 'User not found',
+} as const;
+
+throw new Error(ERROR_MESSAGES.INVALID_EMAIL);
+
+// ❌ Bad: Hardcoded strings
+throw new Error('Please enter a valid email address');
+```
+
+### Handle Edge Cases Explicitly
+```typescript
+// ✅ Good: Explicit edge case handling
+function divide(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error('Division by zero is not allowed');
+  }
+  return a / b;
+}
+
+// ❌ Bad: Let edge cases cause errors
+function divide(a: number, b: number): number {
+  return a / b; // Could return Infinity or NaN
+}
+```
+
+### Boundary Conditions
+```typescript
+// ✅ Good: Test boundary conditions
+function processArray<T>(items: T[]): T[] {
+  if (items.length === 0) {
+    return [];
+  }
+  if (items.length === 1) {
+    return [items[0]];
+  }
+  return items.map(processItem);
+}
+```
+
+### Vars declaration
+- Use const and let to declare variables.
+- No use var.
+
+```typescript
+// ✅ Good: Use const and let
+const config = loadConfig();
+let counter = 0;
+
+// ❌ Bad: Using var
+var config = loadConfig();
+var counter = 0;
+```
+
+## Language-Specific Guidelines
+
+### JavaScript/TypeScript
+- Use TypeScript for type safety
+- Prefer const over let, avoid var
+- Use async/await over Promises
+- Use destructuring for cleaner code
+
+### Python
+- Follow PEP 8 style guide
+- Use type hints
+- Prefer list comprehensions over loops
+- Use context managers for resource management
+
+### Java
+- Follow Java naming conventions
+- Use appropriate access modifiers
+- Prefer composition over inheritance
+- Use streams for functional programming
+
+## Security Concerns
+
+### Data Validation
+- Always validate user inputs
+- Sanitize data before database operations
+- Use parameterized queries to prevent injection
+- Implement proper authentication and authorization
+
+### Secure Coding
+- Never log sensitive information
+- Use HTTPS for all communications
+- Implement proper session management
+- Follow the principle of least privilege
+
+### Common Vulnerabilities
+- SQL Injection: Use parameterized queries
+- XSS: Sanitize user inputs
+- CSRF: Use proper tokens
+- Buffer Overflow: Use safe string handling
+
+## Performance Considerations
+
+### Optimization Guidelines
+- Profile before optimizing
+- Use appropriate data structures
+- Implement caching where beneficial
+- Consider memory usage and garbage collection
+
+### Monitoring
+- Monitor application performance
+- Track memory usage
+- Monitor response times
+- Set up alerting for performance issues

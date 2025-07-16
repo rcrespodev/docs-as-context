@@ -9,30 +9,34 @@ The framework is designed to be used with Cursor, but can be used with other too
 
 ## Key Features
 
+- Document-as-Context: Each task generate and maintain your own documentation in the docs/tasks/ directory.
+- Context-as-Code: Then you can use the auto-generated documentation to generate new code.
 - Domain-Driven Design (DDD) Rules: Detailed guidelines for aggregates, models, business logic, edge cases, key users, and user stories to provide a clear understanding of the project domain.
 - Automated Task Management: A global task-manager.mdc rule that intelligently applies relevant rules based on task type (e.g., feature, bug, deploy) and context (e.g., frontend, backend, devops).
-- Structured Rule Organization: A main index.mdc and sub-indices (tasks-index.mdc, frontend-index.mdc, etc.) for easy navigation and scalability.
-- Automatic Documentation: Generates Markdown files for tasks, features, and issues, ensuring traceability and ease of onboarding.
-- Code Quality and Testing: Rules for linting (linting.mdc), security(security.mdc), code review(code-review.mdc), and automated test generation (e.g., Jest .spec files) to maintain high standards.
+- Structured Rule Organization: A main index.md and sub-indices (tasks-index.md, frontend-index.md, etc.) for easy navigation and scalability.
+- Code Quality and Testing: Writte automated clean code with high standars of quality, testing and security. Rules for linting (linting.mdc), security(security.mdc), code review(code-review.mdc), and automated test generation (e.g., Jest .spec files) to maintain high standards.
 - Temporary File Handling: Manages ephemeral files (e.g., logs, test configs) that are automatically created and deleted to keep the repository clean.
-- AI Context Enhancement: context-provider.mdc generates rich context files per task with dependencies, requirements, and objectives.
 - Knowledge Base Management: knowledge-base.mdc maintains a repository of technical documentation, best practices, and code examples accessible to AI agents.
-
+- Tech stack: Maintenaibles rules for each technology stack. e.g. mern-stack.mdc, react.mdc, nestjs.mdc, llm.mdc, mcp-agent.mdc, etc.
+- Project Status Management: project-status.mdc maintains a repository of project status, progress, roadmap, backlog, sprint, sprint backlog, and sprint progress.
+- Project Management: project-management.mdc maintains a repository of project management, status, progress, roadmap, backlog, sprint, sprint backlog, and sprint progress.
+- Integration with github: git-commit-writer.mdc, git-issue-writer.mdc, pull-request-writer.mdc, etc.
 
 ## Base Template Structure
 
 ```yaml
 root/
-├── rules/                  # All rule files
+├── .cursor/rules/                  # All rule files
 │   ├── core/               # Core rules
 │   │   ├── task-manager.mdc             # Task manager rules
+│   │   ├── testing.mdc                  # Testing rules
 │   │   ├── code-quality.mdc            # Standards for writing quality code
 │   │   ├── code-security.mdc           # Standards for writing secure code
 │   │   ├── code-review.mdc             # Code review automation rules
 │   │   ├── rule-writer.mdc             # Guidelines for creating new rules with consistent standards
 │   │   ├── pull-request-writer.mdc     # Guidelines for writing pull request comments
-│   │   ├── git-commit-writer.mdc       # Guidelines for writing git commit messages
-│   │   ├── git-issue-writer.mdc        # Guidelines for writing git issues according to project templates
+│   │   ├── git-commit-writer.mdc       # Guidelines for writing git commit messages //TODO
+│   │   ├── git-issue-writer.mdc        # Guidelines for writing git issues according to project templates //TODO
 │   │   ├── code-linting-guidelines.mdc # Guidelines for following project linting standards
 │   │   ├── documentation-guidelines.mdc # Guidelines for writing project documentation
 │   │   ├── project-structure.mdc       # Rules for following project structure
@@ -73,9 +77,10 @@ root/
 │       ├── rust-guidelines.mdc         # Rust guidelines
 │       ├── php-guidelines.mdc          # PHP guidelines
 │       └── ruby-guidelines.mdc         # Ruby guidelines
+│   ├── index.md                   # Index of all rules
 ├── docs/                   # Centralized project documentation
 │   ├── tasks/              # Task files
-│   │   ├── tasks-index.mdc             # Index of all tasks
+│   │   ├── tasks-index.md             # Index of all tasks
 │   │   ├── temp/                       # Temporary tasks (not committed to repository)
 │   │   │   └── temporary-task.md       # Temporary task template
 │   │   ├── feature/                    # Feature tasks
@@ -102,7 +107,7 @@ root/
 │       ├── application-architecture.md # Application architecture
 │       └── user-stories/               # User stories
 │           ├── features/               # Feature user stories
-│           ├── user-stories-index.mdc  # User stories index
+│           ├── user-stories-index.md  # User stories index
 │           ├── user-stories-login.mdc  # Login user story
 │           ├── user-stories-register.mdc # Registration user story
 │           ├── user-stories-logout.mdc # Logout user story
@@ -117,12 +122,23 @@ root/
 
 ## Directory Structure Explanation
 
-### Rules Directory (`/rules`)
+### Index rules directory
+
+The index.md file is the main index of all rules with detailed description of each rule.
+
+```
+.cursor/rules/
+├── index.md                   # Index of all rules
+└── ...
+```
+
+### Rules Directory (`/.cursor/rules`)
 The rules directory contains all the guidelines and standards that AI agents follow when working on the project. It's organized into four main categories:
 
-#### Core Rules (`/rules/core`)
+#### Core Rules (`/.cursor/rules/core`)
 Essential guidelines that apply across all aspects of development:
 - **task-manager.mdc**: Defines how to create, structure, update and delete tasks in the docs/tasks/ directory
+- **testing.mdc**: Standards for writing high-quality, maintainable tests. Apply to all tests. Is agnostic of the technology stack.
 - **code-quality.mdc**: Standards for writing high-quality, maintainable code. Apply to all code. Is agnostic of the technology stack.
 - **code-security.mdc**: Security best practices and guidelines for secure code development. Apply to all code. Is agnostic of the technology stack.
 - **code-review.mdc**: Automated rules for code review processes. Apply manual to review the code.
@@ -138,7 +154,7 @@ Essential guidelines that apply across all aspects of development:
 - **knowledge-base.mdc**: Centralized knowledge repository for project functionality
 - **project-management.mdc**: Guidelines for project management and status tracking
 
-#### Domain Rules (`/rules/domain`)
+#### Domain Rules (`/.cursor/rules/domain`)
 Domain-Driven Design (DDD) specific guidelines:
 - **user-stories-guidelines.mdc**: Standards for writing user stories
 - **domain-events-guidelines.mdc**: Guidelines for domain event design and implementation
@@ -147,13 +163,13 @@ Domain-Driven Design (DDD) specific guidelines:
 - **domain-value-objects-guidelines.mdc**: Standards for value object design
 - **domain-entities-guidelines.mdc**: Guidelines for entity design and management
 
-#### DevOps Rules (`/rules/devops`)
+#### DevOps Rules (`/.cursor/rules/devops`)
 Infrastructure and deployment guidelines:
 - **ci-cd.mdc**: Continuous Integration/Continuous Deployment configuration
 - **monitoring.mdc**: Application monitoring and logging setup
 - **infra.mdc**: Infrastructure as Code and deployment guidelines
 
-#### Technology Stack Rules (`/rules/stacks`)
+#### Technology Stack Rules (`/.cursor/rules/stacks`)
 Technology-specific guidelines for various frameworks and languages:
 - **mern-stack-guidelines.mdc**: MongoDB, Express, React, Node.js stack guidelines
 - **react-guidelines.mdc**: React.js development standards
@@ -177,12 +193,12 @@ Technology-specific guidelines for various frameworks and languages:
 - **php-guidelines.mdc**: PHP development standards
 - **ruby-guidelines.mdc**: Ruby development standards
 
-### Documentation Directory (`/docs`)
+### Documentation Directory (`/docs/`)
 Centralized location for all project documentation:
 
-#### Tasks (`/docs/tasks`)
+#### Tasks (`/docs/tasks/`)
 Organized task documentation by type:
-- **tasks-index.mdc**: Master index of all project tasks
+- **tasks-index.md**: Master index of all project tasks
 - **temp/**: Temporary tasks that are not committed to version control
 - **feature/**: New feature development tasks
 - **bug/**: Bug fix and issue resolution tasks
@@ -292,6 +308,19 @@ project/
 - **Test Rules**: `tests/**/*` or `**/*.spec.{ts,js}`
 - **Documentation**: `docs/**/*` or `**/*.md`
 
+#### Nested rules
+Organize rules by placing them in .cursor/rules directories throughout your project. Nested rules automatically attach when files in their directory are referenced.
+
+```
+project/
+  .cursor/rules/        # Project-wide rules
+  backend/
+    server/
+      .cursor/rules/    # Backend-specific rules
+  frontend/
+    .cursor/rules/      # Frontend-specific rules
+```
+
 #### Configuration Best Practices:
 
 1. **Be Specific**: Use targeted patterns rather than broad ones
@@ -384,14 +413,14 @@ Applied Rules: frontend-bug.mdc, testing.mdc, edge-cases.mdc, documentation.mdc,
 
 ### Contribute Rules:
 Add new rules to the appropriate subdirectory (e.g., rules/stacks/ for React-specific rules).
-Update index.mdc or sub-indices to reflect new rules.
+Update index.md or sub-indices to reflect new rules.
 
 ## Contributing
 We welcome contributions to improve the framework! To contribute:
 
 - Fork the repository.
 - Create or modify rules in the rules/ directory.
-- Update relevant indices (index.mdc, tasks-index.mdc, etc.).
+- Update relevant indices (index.md, tasks-index.md, etc.).
 - Submit a pull request with a detailed description (use pull-request-writer.mdc for automated PR generation).
 
 ## Future Improvements

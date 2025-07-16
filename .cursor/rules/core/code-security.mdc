@@ -1,0 +1,575 @@
+---
+description: Comprehensive guidelines for security across all programming languages and frameworks.
+globs:
+alwaysApply: false
+---
+
+# Security Standards
+
+## Overview
+This rule defines comprehensive security standards for all programming languages and frameworks. It covers authentication, authorization, data protection, input validation, and common security vulnerabilities.
+
+## Core Security Principles
+
+### 1. Defense in Depth
+- Implement multiple layers of security
+- Don't rely on a single security measure
+- Use defense in depth strategy
+- Implement security at every layer
+
+### 2. Principle of Least Privilege
+- Grant minimum necessary permissions
+- Use role-based access control (RBAC)
+- Limit user and system privileges
+- Implement proper authorization checks
+
+### 3. Secure by Default
+- Configure secure defaults
+- Fail securely when errors occur
+- Use secure coding practices
+- Implement secure defaults
+
+## Authentication
+
+### Password Security
+```typescript
+// ✅ Good: Secure password handling
+import bcrypt from 'bcrypt';
+
+const hashPassword = async (password: string): Promise<string> => {
+  const saltRounds = 12;
+  return await bcrypt.hash(password, saltRounds);
+};
+
+const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+  return await bcrypt.compare(password, hash);
+};
+
+// ❌ Bad: Plain text passwords
+const storePassword = (password: string) => {
+  // Never store plain text passwords
+  database.save({ password });
+};
+```
+
+### Multi-Factor Authentication
+```typescript
+// ✅ Good: Implement MFA
+interface MFAConfig {
+  enabled: boolean;
+  methods: ('sms' | 'email' | 'totp')[];
+  backupCodes: string[];
+}
+
+const verifyMFA = async (userId: string, code: string): Promise<boolean> => {
+  const user = await getUser(userId);
+  return await verifyTOTP(user.secret, code);
+};
+```
+
+### Authentication Management
+
+Use JWT for authentication.
+
+```typescript
+// ✅ Good: Secure authentication handling
+const signJwtUserToken = (user: User): string => {
+  const token = {
+    id: generateSecureId(),
+    userId: user.id,
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    ipAddress: getClientIP(),
+    userAgent: getClientUserAgent(),
+  };
+  return jwt.sign(token, process.env.JWT_SECRET);
+};
+
+const validateJwtUserToken = (token: string): boolean => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};
+```
+
+Use refresh token for authentication.
+
+```typescript
+// ✅ Good: Secure authentication handling
+const signJwtRefreshToken = (user: User): string => {
+  const token = {
+    id: generateSecureId(),
+    userId: user.id,
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    ipAddress: getClientIP(),
+    userAgent: getClientUserAgent(),
+  };
+  return jwt.sign(token, process.env.JWT_SECRET);
+};
+
+const validateJwtRefreshToken = (token: string): boolean => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};
+```
+
+## Authorization
+
+### Role-Based Access Control
+```typescript
+// ✅ Good: RBAC implementation
+enum UserRole {
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  USER = 'user',
+  GUEST = 'guest'
+}
+
+interface Permission {
+  resource: string;
+  action: 'create' | 'read' | 'update' | 'delete';
+}
+
+const checkPermission = (user: User, permission: Permission): boolean => {
+  const userPermissions = getUserPermissions(user.role);
+  return userPermissions.some(p => 
+    p.resource === permission.resource && 
+    p.action === permission.action
+  );
+};
+```
+
+### Resource-Level Authorization
+```typescript
+// ✅ Good: Resource-level checks
+const updateUserProfile = async (userId: string, data: UserData, requesterId: string): Promise<User> => {
+  // Check if requester can modify this user
+  if (requesterId !== userId && !hasAdminRole(requesterId)) {
+    throw new AuthorizationError('Insufficient permissions');
+  }
+  
+  return await userService.update(userId, data);
+};
+```
+
+## Input Validation
+
+### Data Sanitization
+```typescript
+// ✅ Good: Comprehensive input validation
+import { z } from 'zod';
+
+const userSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+  firstName: z.string().min(1).max(50),
+  lastName: z.string().min(1).max(50),
+  age: z.number().min(13).max(120),
+});
+
+const validateUserInput = (data: unknown): UserData => {
+  return userSchema.parse(data);
+};
+```
+
+### SQL Injection Prevention
+```typescript
+// ✅ Good: Parameterized queries
+const getUserById = async (userId: string): Promise<User | null> => {
+  return await db.query(
+    'SELECT * FROM users WHERE id = ? AND active = ?',
+    [userId, true]
+  );
+};
+
+// ❌ Bad: String concatenation
+const getUserById = async (userId: string): Promise<User | null> => {
+  return await db.query(
+    `SELECT * FROM users WHERE id = '${userId}' AND active = true`
+  );
+};
+```
+
+### XSS Prevention
+```typescript
+// ✅ Good: Output encoding
+import DOMPurify from 'dompurify';
+
+const sanitizeHTML = (html: string): string => {
+  return DOMPurify.sanitize(html);
+};
+
+const renderUserContent = (content: string): string => {
+  return sanitizeHTML(content);
+};
+
+// ❌ Bad: Direct HTML insertion
+const renderUserContent = (content: string): string => {
+  return `<div>${content}</div>`; // Vulnerable to XSS
+};
+```
+
+## Data Protection
+
+### Encryption
+```typescript
+// ✅ Good: Encrypt sensitive data
+import crypto from 'crypto';
+
+const encryptData = (data: string, key: string): string => {
+  const algorithm = 'aes-256-gcm';
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipher(algorithm, key);
+  
+  let encrypted = cipher.update(data, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  
+  return `${iv.toString('hex')}:${encrypted}`;
+};
+
+const decryptData = (encryptedData: string, key: string): string => {
+  const [ivHex, encrypted] = encryptedData.split(':');
+  const iv = Buffer.from(ivHex, 'hex');
+  const decipher = crypto.createDecipher('aes-256-gcm', key);
+  
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  
+  return decrypted;
+};
+```
+
+### Secure Storage
+```typescript
+// ✅ Good: Secure data storage
+interface SecureStorage {
+  encrypt(data: any): string;
+  decrypt(encryptedData: string): any;
+}
+
+const secureStorage: SecureStorage = {
+  encrypt: (data) => encryptData(JSON.stringify(data), process.env.ENCRYPTION_KEY),
+  decrypt: (encryptedData) => JSON.parse(decryptData(encryptedData, process.env.ENCRYPTION_KEY)),
+};
+```
+
+## API Security
+
+### Rate Limiting
+```typescript
+// ✅ Good: Implement rate limiting
+import rateLimit from 'express-rate-limit';
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many login attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/auth', authLimiter);
+```
+
+### CORS Configuration
+```typescript
+// ✅ Good: Proper CORS setup
+import cors from 'cors';
+
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+```
+
+### API Key Security
+```typescript
+// ✅ Good: Secure API key handling
+const validateApiKey = (apiKey: string): boolean => {
+  const validKeys = process.env.API_KEYS?.split(',') || [];
+  return validKeys.includes(apiKey);
+};
+
+const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const apiKey = req.headers['x-api-key'] as string;
+  
+  if (!apiKey || !validateApiKey(apiKey)) {
+    return res.status(401).json({ error: 'Invalid API key' });
+  }
+  
+  next();
+};
+```
+
+## File Upload Security
+
+### File Validation
+```typescript
+// ✅ Good: Secure file upload
+import multer from 'multer';
+import path from 'path';
+
+const allowedFileTypes = ['.jpg', '.jpeg', '.png', '.pdf'];
+const maxFileSize = 5 * 1024 * 1024; // 5MB
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: Function) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  
+  if (!allowedFileTypes.includes(ext)) {
+    return cb(new Error('Invalid file type'), false);
+  }
+  
+  cb(null, true);
+};
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: './uploads/',
+    filename: (req, file, cb) => {
+      const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+      cb(null, uniqueName);
+    }
+  }),
+  fileFilter,
+  limits: {
+    fileSize: maxFileSize
+  }
+});
+```
+
+## Environment Security
+
+### Environment Variables
+```typescript
+// ✅ Good: Secure environment configuration
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'ENCRYPTION_KEY',
+  'API_KEYS'
+];
+
+const validateEnvironment = () => {
+  const missing = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+};
+
+validateEnvironment();
+```
+
+### Secrets Management
+```typescript
+// ✅ Good: Secure secrets handling
+interface SecretsConfig {
+  jwtSecret: string;
+  encryptionKey: string;
+  databasePassword: string;
+  apiKeys: string[];
+}
+
+const loadSecrets = (): SecretsConfig => {
+  return {
+    jwtSecret: process.env.JWT_SECRET!,
+    encryptionKey: process.env.ENCRYPTION_KEY!,
+    databasePassword: process.env.DATABASE_PASSWORD!,
+    apiKeys: process.env.API_KEYS?.split(',') || [],
+  };
+};
+```
+
+## Logging and Monitoring
+
+### Security Logging
+```typescript
+// ✅ Good: Security event logging
+interface SecurityEvent {
+  type: 'login_attempt' | 'failed_auth' | 'suspicious_activity' | 'data_access';
+  userId?: string;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+  details: any;
+}
+
+const logSecurityEvent = (event: SecurityEvent) => {
+  logger.warn('Security event detected', {
+    ...event,
+    timestamp: event.timestamp.toISOString(),
+  });
+  
+  // Alert on suspicious activity
+  if (event.type === 'suspicious_activity') {
+    alertSecurityTeam(event);
+  }
+};
+```
+
+### Audit Trails
+```typescript
+// ✅ Good: Comprehensive audit logging
+interface AuditLog {
+  action: string;
+  resource: string;
+  userId: string;
+  ipAddress: string;
+  timestamp: Date;
+  changes?: any;
+  metadata?: any;
+}
+
+const logAuditEvent = async (auditLog: AuditLog) => {
+  await auditRepository.create({
+    ...auditLog,
+    timestamp: auditLog.timestamp.toISOString(),
+  });
+};
+```
+
+## Common Vulnerabilities
+
+### CSRF Protection
+```typescript
+// ✅ Good: CSRF token implementation
+import csrf from 'csurf';
+
+const csrfProtection = csrf({ cookie: true });
+
+app.use(csrfProtection);
+
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+```
+
+### Content Security Policy
+```typescript
+// ✅ Good: CSP implementation
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+  ].join('; '));
+  
+  next();
+});
+```
+
+### HTTP Security Headers
+```typescript
+// ✅ Good: Security headers
+import helmet from 'helmet';
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+```
+
+## Testing Security
+
+### Security Testing
+```typescript
+// ✅ Good: Security test examples
+describe('Security Tests', () => {
+  it('should prevent SQL injection', async () => {
+    const maliciousInput = "'; DROP TABLE users; --";
+    
+    const response = await request(app)
+      .post('/api/users')
+      .send({ name: maliciousInput })
+      .expect(400);
+    
+    // Verify table still exists
+    const users = await db.query('SELECT COUNT(*) FROM users');
+    expect(users[0].count).toBeGreaterThan(0);
+  });
+  
+  it('should prevent XSS attacks', async () => {
+    const maliciousScript = '<script>alert("xss")</script>';
+    
+    const response = await request(app)
+      .post('/api/posts')
+      .send({ content: maliciousScript })
+      .expect(201);
+    
+    expect(response.body.content).not.toContain('<script>');
+  });
+});
+```
+
+## Edge Cases
+
+### Error Handling
+```typescript
+// ✅ Good: Secure error handling
+const handleError = (error: Error, req: Request, res: Response) => {
+  // Don't expose internal errors
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  if (isProduction) {
+    logger.error('Application error', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  } else {
+    return res.status(500).json({ error: error.message });
+  }
+};
+```
+
+### Time-Based Attacks
+```typescript
+// ✅ Good: Constant-time comparison
+import crypto from 'crypto';
+
+const constantTimeCompare = (a: string, b: string): boolean => {
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+};
+
+const verifyToken = (providedToken: string, expectedToken: string): boolean => {
+  return constantTimeCompare(providedToken, expectedToken);
+};
+```
+
+## Security Concerns
+
+### Data Breach Response
+- Implement incident response plan
+- Have data breach notification procedures
+- Maintain security contact information
+- Regular security audits and penetration testing
+
+### Compliance
+- Follow industry standards (OWASP, NIST)
+- Implement GDPR compliance measures
+- Regular security training for developers
+- Security code reviews and static analysis
+
+### Monitoring
+- Real-time security monitoring
+- Intrusion detection systems
+- Regular vulnerability assessments
+- Security metrics and reporting
+

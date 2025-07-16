@@ -1,0 +1,410 @@
+---
+description: Automated generation of detailed pull request comments based on task files.
+alwaysApply: false
+---
+
+# Pull Request Writer
+
+## Overview
+Automated generation of detailed pull request comments based on task files. This rule analyzes task metadata and content to create comprehensive, review-friendly PR descriptions that explain context, solution, and implementation details.
+
+## When to Use
+- After completing a task (bug, feature, deploy, refactor)
+- When a task file is provided in the context
+- When generating PR comments for code reviews
+
+## Input Requirements
+- Task file (markdown format) in `docs/tasks/` directory
+- Task must be completed or near completion
+- Task metadata must be properly formatted
+
+## Output
+- Generated `pr_comment.md` file in the repository root
+- Structured PR comment ready for copy-paste into GitHub/GitLab
+
+## Task Analysis Process
+
+### 1. Metadata Extraction
+```yaml
+TaskMetadata:
+  type: "feature" | "bug" | "deploy" | "refactor" | "test" | "documentation"
+  context: "api" | "mobile" | "web" | "desktop" | "ai" | "mcp" | "fullstack"
+  stack: string (optional)
+  priority: "low" | "medium" | "high" | "critical"
+  description: string
+  requirements: string[]
+  dependencies: string[]
+  estimatedTime: string
+  assignee: string
+  labels: string[]
+```
+
+### 2. Content Analysis
+- Extract problem description and symptoms
+- Identify solution approach and implementation details
+- List affected files and components
+- Capture technical decisions and rationale
+- Note any additional issues resolved
+
+### 3. Template Selection
+Based on task type, select appropriate template:
+- **Bug Fix**: Focus on problem, symptoms, root cause, and fix
+- **Feature**: Emphasize new functionality, requirements, and implementation
+- **Refactor**: Highlight improvements, code quality, and maintainability
+- **Deploy**: Focus on deployment changes, configuration, and monitoring
+
+## PR Comment Templates
+
+### Bug Fix Template
+```markdown
+## 🐛 Bug Fix: [Brief Description]
+
+### Problem
+[Extract problem description from task]
+
+### Symptoms
+- [List symptoms from task]
+
+### Root Cause
+[Extract root cause analysis from task]
+
+### Solution
+[Extract solution details from task]
+
+### Changes Made
+- [List specific changes from task]
+
+### Files Modified
+- [List affected files from task]
+
+### Testing
+- [ ] Manual testing completed
+- [ ] Unit tests updated/added
+- [ ] Integration tests verified
+
+### Additional Notes
+[Any additional context or considerations]
+
+---
+**Type**: Bug Fix  
+**Priority**: [Extract from task]  
+**Stack**: [Extract from task]  
+**Estimated Time**: [Extract from task]
+```
+
+### Feature Template
+```markdown
+## ✨ Feature: [Brief Description]
+
+### Overview
+[Extract feature description from task]
+
+### Requirements
+[Extract requirements from task]
+
+### Implementation
+[Extract implementation details from task]
+
+### Technical Decisions
+[Extract technical decisions and rationale from task]
+
+### Files Added/Modified
+- [List files from task]
+
+### Testing
+- [ ] Unit tests added
+- [ ] Integration tests updated
+- [ ] Manual testing completed
+- [ ] Performance testing (if applicable)
+
+### Documentation
+- [ ] Code comments added
+- [ ] README updated (if applicable)
+- [ ] API documentation updated (if applicable)
+
+### Breaking Changes
+[If any, clearly document]
+
+---
+**Type**: Feature  
+**Priority**: [Extract from task]  
+**Stack**: [Extract from task]  
+**Estimated Time**: [Extract from task]
+```
+
+### Refactor Template
+```markdown
+## 🔧 Refactor: [Brief Description]
+
+### Motivation
+[Extract refactoring motivation from task]
+
+### Improvements
+[Extract improvements from task]
+
+### Changes Made
+[Extract specific changes from task]
+
+### Code Quality Improvements
+- [List quality improvements from task]
+
+### Files Refactored
+- [List affected files from task]
+
+### Testing
+- [ ] All existing tests pass
+- [ ] New tests added for refactored code
+- [ ] Performance impact assessed
+
+### Breaking Changes
+[If any, clearly document]
+
+---
+**Type**: Refactor  
+**Priority**: [Extract from task]  
+**Stack**: [Extract from task]  
+**Estimated Time**: [Extract from task]
+```
+
+### Deploy Template
+```markdown
+## 🚀 Deploy: [Brief Description]
+
+### Deployment Changes
+[Extract deployment changes from task]
+
+### Configuration Updates
+[Extract configuration changes from task]
+
+### Environment Changes
+[Extract environment modifications from task]
+
+### Monitoring & Alerts
+[Extract monitoring setup from task]
+
+### Rollback Plan
+[Document rollback strategy]
+
+### Testing
+- [ ] Staging environment tested
+- [ ] Configuration validated
+- [ ] Monitoring verified
+
+---
+**Type**: Deploy  
+**Priority**: [Extract from task]  
+**Stack**: [Extract from task]  
+**Estimated Time**: [Extract from task]
+```
+
+## Content Extraction Guidelines
+
+### Problem Description
+- Look for sections like "Problem", "Issue", "Symptom"
+- Extract clear, concise problem statements
+- Include error messages or specific behaviors
+
+### Solution Details
+- Focus on "Solution", "Implementation", "Changes" sections
+- Extract code examples and technical decisions
+- Include before/after comparisons when available
+
+### Technical Context
+- Extract stack information and dependencies
+- Note any architectural decisions
+- Include performance considerations
+
+### Testing Information
+- Extract testing requirements and completed tests
+- Note any manual testing steps
+- Include performance testing if applicable
+
+## PR Comment Generation Process
+
+### 1. Analyze Task File
+```yaml
+TaskAnalyzer:
+  input:
+    taskFile: "Path to task markdown file"
+  process:
+    - "Extract task metadata from header"
+    - "Identify task type and select template"
+    - "Parse problem description and symptoms"
+    - "Extract solution implementation details"
+    - "List affected files and components"
+    - "Capture technical decisions and rationale"
+    - "Note testing requirements and completion"
+  output:
+    structuredData: "TaskAnalysis object"
+```
+
+### 2. Generate PR Comment
+```yaml
+PRCommentGenerator:
+  input:
+    taskAnalysis: "TaskAnalysis object"
+    template: "Selected template"
+  process:
+    - "Fill template with extracted data"
+    - "Format code examples and file lists"
+    - "Add appropriate emojis and formatting"
+    - "Include task metadata in footer"
+    - "Ensure clarity and review-friendliness"
+  output:
+    prComment: "Formatted markdown string"
+```
+
+### 3. Create Output File
+```yaml
+FileGenerator:
+  input:
+    prComment: "Formatted markdown string"
+  process:
+    - "Create pr_comment.md in repository root"
+    - "Include generation timestamp"
+    - "Add usage instructions"
+  output:
+    filePath: "pr_comment.md"
+```
+
+## Quality Standards
+
+### Clarity
+- Use clear, concise language
+- Avoid technical jargon when possible
+- Explain complex concepts simply
+
+### Completeness
+- Include all relevant context
+- Document breaking changes
+- List all affected files
+
+### Review-Friendly
+- Structure information logically
+- Use bullet points for lists
+- Include code examples when helpful
+
+### Consistency
+- Follow template structure
+- Use consistent formatting
+- Include all required sections
+
+## Example Usage
+
+### Input Task File
+```markdown
+# Bug Fix: Navigation Stack Issues
+
+## Task Information
+- **Type**: bug
+- **Context**: mobile
+- **Stack**: react-native-expo-router
+- **Priority**: high
+- **Description**: Fix navigation between nested stacks in Expo Router
+
+## Problem
+Navigation buttons not working correctly between nested stacks.
+
+## Solution
+Unified stack structure and implemented relative navigation.
+```
+
+### Generated PR Comment
+```markdown
+## 🐛 Bug Fix: Navigation Stack Issues
+
+### Problem
+Navigation buttons not working correctly between nested stacks in Expo Router.
+
+### Solution
+Unified stack structure and implemented relative navigation to maintain coherent navigation history.
+
+### Changes Made
+- Unified main stack in home/_layout.tsx
+- Removed nested stacks from subdirectories
+- Implemented relative navigation patterns
+- Fixed TabNavigator route definitions
+
+### Files Modified
+- home/_layout.tsx
+- home/treatments/[id]/_layout.tsx
+- components/custom/task/task-navigation.tsx
+- TabNavigator.tsx
+
+### Testing
+- [x] Manual testing completed
+- [x] Navigation flow verified
+- [x] Back button functionality tested
+```
+
+## Error Handling
+
+### Missing Task File
+- Prompt user to provide task file path
+- Explain required format and structure
+- Offer to help create task file
+
+### Incomplete Metadata
+- Use default values for missing fields
+- Warn about incomplete information
+- Suggest improvements
+
+### Template Selection Issues
+- Default to feature template if type unclear
+- Ask for clarification on task type
+- Provide template options
+
+## Integration with Task Manager
+
+### Task Completion Workflow
+1. Complete task implementation
+2. Update task file with completion status
+3. Generate PR comment using this rule
+4. Create pull request with generated comment
+5. Update task file with PR reference
+
+### Task File Updates
+- Mark tasks as completed
+- Add PR reference and link
+- Update implementation details
+- Note any deviations from original plan
+
+## Best Practices
+
+### Before Generating PR Comment
+- Ensure task is fully implemented
+- Update task file with final details
+- Verify all requirements are met
+- Test the implementation thoroughly
+
+### PR Comment Quality
+- Keep it concise but comprehensive
+- Focus on what changed and why
+- Include context for reviewers
+- Document any assumptions or decisions
+
+### Review Process
+- Use generated comment as starting point
+- Customize based on team preferences
+- Add any missing context
+- Ensure accuracy of information
+
+## Troubleshooting
+
+### Common Issues
+- **Missing task file**: Provide path to task file in context
+- **Incomplete metadata**: Fill in missing task information
+- **Template mismatch**: Verify task type classification
+- **Content extraction**: Ensure task file follows expected format
+
+### Debugging
+- Check task file format and structure
+- Verify metadata extraction
+- Review template selection logic
+- Validate generated content
+
+---
+
+**Usage**: Provide a task file in the context and request PR comment generation. The rule will analyze the task and create a comprehensive PR comment in `pr_comment.md`.
+
+

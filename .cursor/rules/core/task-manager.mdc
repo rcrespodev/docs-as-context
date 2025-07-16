@@ -1,0 +1,386 @@
+---
+description: Central task manager for the dev-ia framework.
+globs: /docs/tasks/**/*.md
+alwaysApply: false
+---
+# Task Manager
+
+## Overview
+Guidelines for creating and managing task lists in markdown files to track project progress.
+This rule is the central task manager. It automatically analyzes task metadata and applies relevant rules based on task type, context, and requirements. This ensures consistent development practices across all projects.
+
+### Task Type Rules
+- **feature**: New functionality or enhancement
+- **bug**: Bug fix or issue resolution
+- **deploy**: Deployment or release task
+- **refactor**: Code refactoring
+- **test**: Testing task
+- **documentation**: Documentation update
+
+### Context Rules
+- **api**: Backend API development
+- **mobile**: Mobile app development
+- **web**: Web frontend development
+- **desktop**: Desktop application
+- **ai**: AI/ML development
+- **mcp**: Model Context Protocol
+- **fullstack**: Full-stack development
+
+### Stack Rules
+- **mern**: MERN stack (MongoDB, Express, React, Node.js)
+- **react**: React development
+- **nestjs**: NestJS backend
+- **prisma**: Prisma ORM
+- **typescript**: TypeScript development
+
+## Task List Creation
+
+1. Create task lists in a markdown file (in root/docs/tasks/) with the following structure:
+   - Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
+   - Include a clear title and description of the feature being implemented
+   - include the task metadata in the file. The metadata should be in the following format:
+     - type: The type of task (feature, bug, deploy, refactor, test, documentation)
+     - context: The context of the task (api, mobile, web, desktop, ai, mcp, fullstack)
+     - stack: The technology stack of the task (mern, react, nestjs, prisma, typescript)
+     - description: The description of the task
+     - priority: The priority of the task (low, medium, high, critical)
+     - estimatedTime: The estimated time to complete the task
+     - assignee: The assignee of the task
+     - labels: The labels of the task
+     - requirements: The requirements of the task
+     - dependencies: The dependencies of the task
+   - Include a list of tasks to be completed
+   - Include a list of tasks that are currently being worked on
+   - Include a list of tasks that are planned for future implementation
+   - Include a list of relevant files that are affected by the feature
+   - Include a list of implementation details
+   - Include a list of notes
+
+# AI Instructions
+
+When working with task lists, the AI should:
+
+1. Create task lists in a markdown file (in root/docs/tasks/). Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
+2. Regularly update the task list file after implementing significant files
+3. Mark completed tasks with [x] when finished
+4. Add new tasks or subtasks or temporary tasks discovered during implementation
+5. the subtasks or temporary or new tasks should be added in another task file in the `docs/tasks/` directory. See the `Task List Creation` section for the structure of the task file. See the directory structure for the task files in the `docs/tasks/` directory.
+6. the subtasks or temporary or new tasks should be listed in the same task file if the task is a sub task of the main task.
+7. the temporary tasks should be deleted after the main task is completed.
+8. Document implementation details, especially for complex features
+9. When implementing tasks one by one, first check which task to implement next
+10. After implementing a task, update the file to reflect progress
+11. When creating a new task, use the task metadata structure to create the task
+12. When creating a new task, use the rule selection algorithm to select the rules to apply
+13. When creating a new task, use the rich task creation to generate the rich task file
+
+## Task List Maintenance
+
+1. Update the task list as you progress:
+   - Mark tasks as completed by changing `[ ]` to `[x]`
+   - Add new tasks as they are identified
+   - Move tasks between sections as appropriate
+
+2. Keep "Relevant Files" section updated with:
+   - File paths that have been created or modified
+   - Brief descriptions of each file's purpose
+   - Status indicators (e.g., ✅) for completed components
+
+3. Add implementation details:
+   - Architecture decisions
+   - Data flow descriptions
+   - Technical components needed
+   - Environment configuration
+
+## Task Manager Implementation
+
+### Task Metadata Structure
+```yaml
+# ✅ Good: Task metadata structure
+TaskMetadata:
+  type: "feature" | "bug" | "deploy" | "refactor" | "test" | "documentation"
+  context: "api" | "mobile" | "web" | "desktop" | "ai" | "mcp" | "fullstack"
+  stack: string (optional)
+  priority: "low" | "medium" | "high" | "critical"
+  description: string
+  requirements: string[] (optional)
+  dependencies: string[] (optional)
+  estimatedTime: string (optional)
+  assignee: string (optional)
+  labels: string[] (optional)
+
+# Example Task Metadata
+exampleTask:
+  type: "feature"
+  context: "api"
+  stack: "nestjs"
+  priority: "high"
+  description: "Implement user authentication system"
+  requirements:
+    - "JWT token generation"
+    - "Password hashing"
+    - "User registration endpoint"
+  dependencies:
+    - "Database setup"
+    - "User model creation"
+  estimatedTime: "3 days"
+  assignee: "John Doe"
+  labels:
+    - "authentication"
+    - "security"
+```
+
+### Rule Selection Algorithm 
+```yaml
+# ✅ Good: Rule selection algorithm
+TaskManager:
+  ruleRegistry: "Map<string, Rule>"
+  
+  analyzeTask:
+    input:
+      metadata: "TaskMetadata object"
+    process:
+      - "Initialize empty selectedRules array"
+      - "Always apply universal rules:"
+        - "Add universal/code-quality"
+        - "Add universal/testing"
+        - "Add universal/documentation"
+      - "Apply type-specific rules:"
+        - "If type = 'feature': Add tasks/feature-development"
+        - "If type = 'bug': Add tasks/bug-fix"
+        - "If type = 'deploy': Add devops/ci-cd, devops/monitoring"
+        - "If type = 'refactor': Add universal/code-review"
+        - "If type = 'test': Add universal/testing"
+        - "If type = 'documentation': Add universal/documentation"
+      - "Apply context-specific rules:"
+        - "If context = 'api': Add backend/api-development, universal/security"
+        - "If context = 'web': Add frontend/web-development, universal/accessibility, universal/performance"
+        - "If context = 'mobile': Add frontend/mobile-development, universal/accessibility"
+        - "If context = 'fullstack': Add backend/api-development, frontend/web-development, universal/security"
+      - "Apply stack-specific rules:"
+        - "If stack exists: Add stacks/{stack}"
+      - "Apply security rules if sensitive:"
+        - "Check for security keywords in description"
+        - "If found: Add universal/security"
+      - "Apply performance rules if critical:"
+        - "Check for performance keywords in description"
+        - "If found: Add universal/performance"
+      - "Return selectedRules array"
+```
+
+## Sub task and temporary task creation
+
+- Sub task: A task that is part of a larger task and is not a standalone task.
+- Temporary task: A task that is not part of the main task and is not a standalone task. It is a task that is not part of the main task and is not a standalone task.
+
+
+## Rich Task Creation
+
+Find the rules index in the `.cursor/rules/index.md` file and use the rules to generate the rich task file.
+
+```yaml
+# ✅ Good: Rich task file generation
+TaskFileGenerator:
+  generateTaskFile:
+    input:
+      metadata: "TaskMetadata object"
+      rules: "Rule[] array"
+    process:
+      - "Create task file template"
+      - "Include task information"
+      - "List objectives and requirements"
+      - "Include applied rules with guidelines"
+      - "Include task list"
+      - "Include completed tasks"
+      - "Include in progress tasks"
+      - "Include future tasks"
+      - "Include relevant files"
+      - "Include implementation details"
+      - "Include notes"
+    output:
+      format: "Markdown string"
+      template: |
+        # Task File: {description}
+        
+        ## Task Information
+        - **Type**: {type}
+        - **Context**: {context}
+        - **Stack**: {stack || 'N/A'}
+        - **Priority**: {priority}
+        - **Description**: {description}
+        
+        ## Objectives
+        - Implement {description}
+        - Follow all applicable development standards
+        - Ensure code quality and maintainability
+        - Complete within estimated time
+        
+        ## Requirements
+        {requirements}
+        
+        ## Rules to apply
+        {rules and auto applied rules}
+
+        ## Task List
+        - [ ] Task 1 - Description of task 1
+        - [ ] Task 2 - Description of task 2
+        - [ ] Task 3 - Description of task 3
+        - [ ] Task 4 - Description of task 4
+        - [ ] Task 5 - Description of task 5
+        - [ ] Task 6 - Description of task 6
+
+        ## Completed Tasks
+        - [x] Task 1 - Description of task 1 that has been completed
+        - [x] Task 2 - Description of task 2 that has been completed
+        
+        ## In Progress Tasks
+        
+        - [ ] Task 3 - Description of task 3 currently being worked on
+        - [ ] Task 4 - Description of task 4 to be completed soon
+        
+        ## Future Tasks
+        
+        - [ ] Task 5 - Description of task 5 planned for future implementation
+        - [ ] Task 6 - Description of task 6 planned for future implementation
+        
+        ## Implementation Plan
+        
+        Detailed description of how the feature will be implemented.
+        
+        ### Relevant Files
+        
+        - path/to/file1.ts - Description of purpose of file 1
+        - path/to/file2.ts - Description of purpose of file 2
+
+        ## Implementation Details
+        
+        Detailed description of how the feature will be implemented.
+
+        ## Notes
+        - Use this task file as reference during development
+        - Update progress regularly
+        - Flag any issues or blockers immediately
+```
+
+## Edge Cases
+
+### Missing Metadata
+```yaml
+# ✅ Good: Handle missing metadata gracefully
+TaskManager:
+  analyzeTask:
+    input:
+      metadata: "Partial<TaskMetadata> object"
+    process:
+      - "Create default metadata:"
+        - "type: 'feature'"
+        - "context: 'web'"
+        - "priority: 'medium'"
+        - "description: 'Unknown task'"
+      - "Merge with provided metadata"
+      - "Request the user to fill in the missing metadata"
+    output:
+      metadata: "TaskMetadata object"
+```
+
+### Conflicting Rules
+```yaml
+# ✅ Good: Resolve rule conflicts
+RuleConflictResolver:
+  resolveConflicts:
+    input:
+      rules: "Rule[] array"
+    process:
+      - "Initialize empty resolvedRules array"
+      - "Create conflicts map to group rules by category"
+      - "For each rule:"
+        - "Get rule category"
+        - "Add to conflicts map"
+      - "For each conflict group:"
+        - "If single rule: Add to resolvedRules"
+        - "If multiple rules: Apply highest priority rule"
+      - "Request the user to resolve the conflicts"
+    output:
+      rules: "Rule[] array"
+```
+
+# Examples
+
+## Rule Application Examples
+
+### Feature Development Task
+```markdown
+# Task: Implement User Authentication
+- type: feature
+- context: api
+- stack: nestjs
+- description: Add JWT-based authentication system
+
+Rules to apply:
+- `universal/code-quality.mdc` - Code quality standards
+- `universal/testing.mdc` - Testing guidelines
+- `universal/security.mdc` - Security standards
+- `universal/documentation.mdc` - Documentation standards
+- `backend/api-development.mdc` - API development patterns
+- `domain/domain-aggregates.mdc` - Domain modeling  
+```
+
+### Bug Fix Task
+```markdown
+# Task: Fix Login Button Not Working
+- type: bug
+- context: web
+- stack: react
+- description: Submit button not responding to clicks
+
+Rules to apply:
+- `universal/code-quality.mdc` - Code quality standards
+- `universal/testing.mdc` - Testing guidelines
+- `frontend/react.mdc` - React best practices
+- `universal/accessibility.mdc` - Accessibility standards
+- `universal/performance.mdc` - Performance optimization
+```
+
+### Deployment Task
+```markdown
+# Task: Deploy to Production
+- type: deploy
+- context: fullstack
+- description: Deploy application to production environment
+
+Rules to apply:
+- `devops/ci-cd.mdc` - CI/CD pipeline configuration
+- `devops/monitoring.mdc` - Monitoring setup
+- `universal/security.mdc` - Security review
+- `universal/testing.mdc` - Pre-deployment testing
+```
+
+## Example Task Update
+
+When updating a task from "In Progress" to "Completed":
+
+```markdown
+## In Progress Tasks
+
+- [ ] Implement database schema
+- [ ] Create API endpoints for data access
+
+## Completed Tasks
+
+- [x] Set up project structure
+- [x] Configure environment variables
+```
+
+Should become:
+
+```markdown
+## In Progress Tasks
+
+- [ ] Create API endpoints for data access
+
+## Completed Tasks
+
+- [x] Set up project structure
+- [x] Configure environment variables
+- [x] Implement database schema
+```

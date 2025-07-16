@@ -1,0 +1,307 @@
+---
+description: Guidelines for creating new rules in the dev-ia framework
+alwaysApply: false
+---
+# Rule Writer Guidelines
+
+## Overview
+This rule provides guidelines for creating new rules. All rules should follow these standards to ensure consistency and maintainability.
+
+## Rule Structure
+
+### Header Format
+Every rule must start with the following header:
+
+---
+description: Brief description of the rule's purpose
+globs: optional/path/pattern/**/* 
+alwaysApply: false
+---
+
+### Required Fields
+- **description**: Clear, concise description of what the rule covers
+- **globs**: File patterns where this rule should apply (optional)
+- **alwaysApply**: Whether the rule should always be applied (default: false)
+
+# Cursor Rules Location
+
+How to add new cursor rules to the project
+
+1. Always place rule files in PROJECT_ROOT/.cursor/rules/:
+    ```
+    .cursor/rules/
+    ├── your-rule-name.mdc
+    ├── another-rule.mdc
+    └── ...
+    ```
+
+2. Follow the naming convention:
+    - Use kebab-case for filenames
+    - Always use .mdc extension
+    - Make names descriptive of the rule's purpose
+
+3. Directory structure:
+    ```
+    PROJECT_ROOT/
+    ├── .cursor/
+    │   └── rules/
+    │       ├── your-rule-name.mdc
+    │       └── ...
+    └── ...
+    ```
+
+4. Never place rule files:
+    - In the project root
+    - In subdirectories outside .cursor/rules
+    - In any other location
+
+
+# Rule Categories
+  
+### Core Rules
+- Apply across all projects and technologies
+- Focus on general development principles
+- Examples: code-quality, testing, documentation
+
+### Domain Rules
+- Focus on business logic and domain modeling
+- Examples: aggregates, models, business-logic
+
+### Stack Rules
+- Apply to specific technologies or frameworks
+- Examples: react, nestjs, prisma
+
+## Naming Conventions
+
+### File Names
+- Use kebab-case for filenames
+- Always use `.mdc` extension
+- Make names descriptive of the rule's purpose
+- Examples: `code-quality.mdc`, `api-development.mdc`
+
+### Directory Structure
+```
+.cursor/rules/
+├── core/          # Core rules
+├── domain/            # Domain-driven design rules
+├── stacks/          # Stack-specific rules
+├── devops/            # DevOps rules
+```
+
+## Content Organization
+
+### 1. Title and Overview
+Start with a clear title and brief overview of the rule's purpose.
+
+### 2. Main Sections
+Organize content into logical sections:
+- **Guidelines**: Core principles and standards
+- **Examples**: Code examples showing good and bad practices
+- **Edge Cases**: Special considerations and exceptions
+- **Security Concerns**: Security-related considerations
+
+### 3. Code Examples
+Always include both good and bad examples:
+
+```typescript
+// ✅ Good example
+function goodExample() {
+  // Implementation following guidelines
+}
+
+// ❌ Bad example  
+function badExample() {
+  // Implementation not following guidelines
+}
+```
+
+### 4. YAML Pseudocode for Algorithms
+When describing complex algorithms, decision trees, or processes that AI agents need to follow, use YAML pseudocode format:
+
+```yaml
+# ✅ Good: YAML pseudocode for algorithm description
+AlgorithmName:
+  input:
+    parameter1: "Type description"
+    parameter2: "Type description"
+  process:
+    - "Step 1: Clear action description"
+    - "Step 2: Another action"
+    - "Conditional logic:"
+      - "If condition1: Action A"
+      - "If condition2: Action B"
+    - "Loop or iteration:"
+      - "For each item in collection:"
+        - "Process item"
+        - "Apply transformation"
+  output:
+    result: "Expected output description"
+```
+
+**Benefits of YAML Pseudocode:**
+- **Clear Structure**: Hierarchical organization makes complex logic easy to follow
+- **AI-Friendly**: YAML format is easily parseable by AI models
+- **Readable**: Human developers can quickly understand the algorithm flow
+- **Maintainable**: Easy to update and modify algorithm steps
+- **Consistent**: Standardized format across all rules
+
+**When to Use YAML Pseudocode:**
+- Complex decision-making algorithms
+- Multi-step processes with conditional logic
+- Rule selection and application logic
+- Data transformation workflows
+- Configuration management processes
+
+**Example: Rule Selection Algorithm**
+```yaml
+# ✅ Good: Rule selection algorithm from task-manager.mdc
+TaskManager:
+  ruleRegistry: "Map<string, Rule>"
+  
+  analyzeTask:
+    input:
+      metadata: "TaskMetadata object"
+    process:
+      - "Initialize empty selectedRules array"
+      - "Always apply universal rules:"
+        - "Add universal/code-quality"
+        - "Add universal/testing"
+        - "Add universal/documentation"
+      - "Apply type-specific rules:"
+        - "If type = 'feature': Add tasks/feature-development"
+        - "If type = 'bug': Add tasks/bug-fix"
+        - "If type = 'deploy': Add devops/ci-cd, devops/monitoring"
+        - "If type = 'refactor': Add universal/code-review"
+        - "If type = 'test': Add universal/testing"
+        - "If type = 'documentation': Add universal/documentation"
+      - "Apply context-specific rules:"
+        - "If context = 'api': Add backend/api-development, universal/security"
+        - "If context = 'web': Add frontend/web-development, universal/accessibility, universal/performance"
+        - "If context = 'mobile': Add frontend/mobile-development, universal/accessibility"
+        - "If context = 'fullstack': Add backend/api-development, frontend/web-development, universal/security"
+      - "Apply stack-specific rules:"
+        - "If stack exists: Add stacks/{stack}"
+      - "Apply security rules if sensitive:"
+        - "Check for security keywords in description"
+        - "If found: Add universal/security"
+      - "Apply performance rules if critical:"
+        - "Check for performance keywords in description"
+        - "If found: Add universal/performance"
+      - "Return selectedRules array"
+```
+
+This YAML pseudocode clearly communicates the complex rule selection logic to AI agents, making it easy for them to understand and implement the algorithm.
+
+## Content Guidelines
+
+### Writing Style
+- Use clear, concise language
+- Provide specific, actionable guidance
+- Include practical examples
+- Address common pitfalls and edge cases
+
+### Code Examples
+- Use realistic, practical examples
+- Include both positive and negative examples
+- Show complete, working code snippets
+- Use appropriate language syntax highlighting
+
+### Security Considerations
+- Always include security considerations when relevant
+- Address common security pitfalls
+- Provide secure coding practices
+
+## Rule Maintenance
+
+### Versioning
+- Use semantic versioning for rule updates
+- Create new versions for breaking changes
+- Example: `rule-writer-v1.mdc`, `rule-writer-v2.mdc`
+
+### Documentation
+- Keep rules up to date with framework changes
+- Update examples to reflect current best practices
+- Remove outdated or deprecated guidance
+
+### Feedback Loop
+- Encourage developer feedback on rule effectiveness
+- Update rules based on real-world usage
+- Track rule usage and effectiveness
+
+## Edge Cases
+
+1. **Conflicting Rules**: When rules conflict, prioritize more specific rules over general ones
+2. **Technology Evolution**: Update rules to reflect new technologies and practices
+3. **Project-Specific Needs**: Allow for project-specific customizations while maintaining core principles
+
+## Security Concerns
+
+- Never include sensitive information in rules
+- Avoid hardcoded credentials or API keys in examples
+- Use placeholder values for sensitive data
+- Include security best practices in relevant rules
+
+## Examples
+
+### Good Rule Structure
+```markdown
+# Code Quality Guidelines
+
+## Overview
+This rule defines standards for writing clean, maintainable code.
+
+## Guidelines
+1. Use meaningful variable names
+2. Keep functions small and focused
+3. Add appropriate comments
+
+## Examples
+```typescript
+// ✅ Good: Clear variable names
+const userProfile = getUserProfile(userId);
+
+// ❌ Bad: Unclear variable names
+const up = getUserProfile(uid);
+```
+
+## Edge Cases
+- Handle null/undefined values appropriately
+- Consider performance implications for large datasets
+
+## Security Concerns
+- Validate all user inputs
+- Sanitize data before database operations
+```
+
+### Bad Rule Structure
+```markdown
+# Code Stuff
+
+Some random guidelines without clear structure or examples.
+```
+
+## Contributing to Rules
+
+### Creating New Rules
+1. Identify the need for a new rule
+2. Follow the structure guidelines above
+3. Include comprehensive examples
+4. Test the rule with real code
+5. Get feedback from other developers
+
+### Updating Existing Rules
+1. Maintain backward compatibility when possible
+2. Update examples to reflect current practices
+3. Add new edge cases and considerations
+4. Version the rule appropriately
+
+## Integration with Framework
+
+### Task Manager Integration
+- Rules should be discoverable by task-manager.mdc
+- Include appropriate metadata for automatic selection
+- Tag rules with relevant categories and contexts
+
+### Index Integration
+- Update relevant index files when creating new rules in the .cursor/rules/index.md file
+- Ensure rules are properly categorized

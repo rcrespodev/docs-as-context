@@ -1,0 +1,430 @@
+---
+description: Standards for Markdown documentation across all projects
+globs: **/*.md
+alwaysApply: false
+---
+# Documentation Standards
+
+## Overview
+This rule defines standards for creating clear, comprehensive, and maintainable documentation using Markdown format. It covers README files, API documentation, code comments, and project documentation.
+
+## Markdown Guidelines
+
+### Headers
+```markdown
+# Main Title (H1)
+## Section Title (H2)
+### Subsection Title (H3)
+#### Detail Title (H4)
+```
+
+### Code Blocks
+```markdown
+# Inline code
+Use `code` for inline code snippets.
+
+# Code blocks with language
+```typescript
+function example() {
+  return 'Hello World';
+}
+```
+
+### Lists
+```markdown
+# Unordered lists
+- Item 1
+- Item 2
+  - Subitem 2.1
+  - Subitem 2.2
+- Item 3
+
+# Ordered lists
+1. First step
+2. Second step
+3. Third step
+
+# Task lists
+- [x] Completed task
+- [ ] Pending task
+- [ ] Another pending task
+```
+
+### Tables
+```markdown
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+```
+
+## Project Documentation
+
+### Architecture Documentation
+```markdown
+# Architecture Overview
+
+## System Components
+
+### Frontend (React/Next.js)
+- **Purpose**: User interface and client-side logic
+- **Technology**: React 18, Next.js 14, TypeScript
+- **Key Features**: SSR, API routes, authentication
+
+### Backend (NestJS)
+- **Purpose**: API server and business logic
+- **Technology**: NestJS, TypeScript, PostgreSQL
+- **Key Features**: REST API, authentication, database management
+
+### Database (PostgreSQL)
+- **Purpose**: Data persistence
+- **Technology**: PostgreSQL 14, Prisma ORM
+- **Key Features**: ACID compliance, migrations, seeding
+```
+
+### Data Flow
+```mermaid
+graph TD
+    A[User] --> B[Frontend]
+    B --> C[API Gateway]
+    C --> D[Backend API]
+    D --> E[Database]
+    E --> D
+    D --> C
+    C --> B
+    B --> A
+```
+
+### Setup Documentation (README.md example)
+```markdown
+# Development Setup
+
+## Prerequisites
+
+- Node.js 18+ ([Download](https://nodejs.org/))
+- PostgreSQL 14+ ([Download](https://www.postgresql.org/))
+- Git ([Download](https://git-scm.com/))
+
+## Installation
+
+1. Clone the repository:
+   git clone https://github.com/org/project.git
+   cd project
+
+2. Install dependencies:
+   npm install
+
+3. Set up environment variables:
+   cp .env.example .env
+   # Edit .env with your configuration
+
+4. Set up the database:
+   npm run db:migrate
+   npm run db:seed
+
+5. Start the development server:
+   npm run dev
+
+## Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | Yes | - |
+| `JWT_SECRET` | Secret for JWT tokens | Yes | - |
+| `NODE_ENV` | Environment mode | No | `development` |
+| `PORT` | Server port | No | `3000` |
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run test` - Run tests
+- `npm run lint` - Run linter
+- `npm run db:migrate` - Run database migrations
+- `npm run db:seed` - Seed database with test data
+
+# Version History
+
+## v2.0.0 (2024-01-01)
+- Breaking: Changed API response format
+- Added: New user management features
+- Fixed: Authentication bug in mobile app
+
+## v1.5.0 (2023-12-01)
+- Added: Password reset functionality
+- Improved: Performance optimizations
+- Fixed: Minor UI issues
+
+## v1.0.0 (2023-11-01)
+- Initial release
+- Basic user management
+- Authentication system
+```
+
+### Prd Documentation (Product Requirements Document example) (docs/prd.md) 
+
+```markdown
+# Product Requirements Document (PRD)
+
+- Project Name: [Insert Project Name]
+- Date: [Insert Date]
+- Version: [Insert Version Number]
+
+## Purpose
+This document describes the requirements and specifications for [Project Name]. It serves as a guide for the development team and stakeholders, ensuring alignment on project objectives and deliverables.
+
+## Objectives
+The primary objectives of [Project Name] are:
+
+[Goal 1, e.g., improve user experience]
+[Goal 2, e.g., increase efficiency]
+[Goal 3, e.g., expand market reach]
+
+## Success Criteria
+The success of [Project Name] will be measured by:
+
+[Metric 1, e.g., increase user engagement by X%]
+[Metric 2, e.g., reduce processing time by Y minutes]
+[Metric 3, e.g., reach Z number of new users]
+
+## Target Audience
+The target audience for [Project Name] includes:
+
+[User Group 1, e.g., existing customers]
+[User Group 2, e.g., potential new users]
+[User Group 3, e.g., internal teams]
+
+Their key needs and pain points are:
+
+[Need/Pain Point 1]
+[Need/Pain Point 2]
+[Need/Pain Point 3]
+
+## Features and Requirements
+The following features are required for [Project Name]:
+
+Feature 1: [Description of Feature 1]
+
+Priority: [Required / Desirable]
+Details: [Additional details or specifications]
+
+Feature 2: [Description of Feature 2]
+
+Priority: [Required / Desirable]
+Details: [Additional details or specifications]
+
+Feature 3: [Description of Feature 3]
+
+Priority: [Required / Desirable]
+Details: [Additional details or specifications]
+
+[Add more features as needed]
+
+## Assumptions and Constraints
+
+Assumptions:
+
+[Assumption 1, [e.g., users have basic technical knowledge]
+[Assumption 2, e.g., integration with existing systems is possible]
+
+Constraints:
+
+[Constraint 1, e.g., budget limitations]
+[Constraint 2, e.g., time constraints]
+
+## Schedule and Milestones
+
+Milestone 1: [Description, e.g., completion of the design phase] - [Expected Date]
+Milestone 2: [Description, e.g., beta release] - [Expected Date]
+Milestone 3: [Description, e.g., final release] - [Expected Date]
+
+## Risks and Mitigations
+
+Risk 1: [Description of the risk]
+
+Mitigation: [How to mitigate the risk]
+
+Risk 2: [Description of the risk]
+
+Mitigation: [How to mitigate the risk]
+
+## Approvals
+This document requires approval from the following stakeholders:
+
+[Stakeholder 1, e.g., Product Manager]
+[Stakeholder 2, e.g., Engineering Lead]
+[Stakeholder 3, e.g., Marketing Director]
+
+## How to Use This Template
+
+- Replace the placeholders (e.g., [Insert Project Name], [Objective 1]) with project-specific information.
+- Add or remove sections based on the complexity and requirements of your project.
+- Use the "Features and Requirements" section to list all required and desirable features, making sure to include a clear description and priority.
+- Customize the "Success Criteria" to define measurable results aligned with project objectives.
+- Update the "Schedule and Milestones" to reflect key project phases and deadlines.
+
+This template is designed to be adaptable to various types of projects, providing a clear structure and alignment among stakeholders.
+
+```
+
+### Application Flow Documentation (application-flow.md example) (docs/application-flow.md)
+
+```markdown
+# Application Flow Document
+
+- Application Name: [Insert Application Name]
+- Date: [Insert Date]
+- Version: [Insert Version Number]
+
+## Purpose
+This document describes the main flows of the [Application Name] application. It serves as a guide for developers, designers, and stakeholders to understand how users will interact with the application to achieve specific objectives.
+
+## Scope
+This document covers the following parts of the application:
+
+[List specific features, modules, or areas covered]
+
+## User Roles
+The application supports the following user roles:
+
+Role 1: [Description of the role and its permissions]
+Role 2: [Description of the role and its permissions]
+[Add more roles as needed]
+
+## Flow Diagrams
+Below are the main flows of the application. Each flow is represented by a diagram or step-by-step description.
+
+### Flow 1: [Flow Name]
+
+**Diagram**: [Insert diagram or link to diagram]
+**Description**: [Brief summary of what this flow accomplishes]
+
+### Flow 2: [Flow Name]
+
+**Diagram**: [Insert diagram or link to diagram]
+**Description**: [Brief summary of what this flow accomplishes]
+
+[Add more flows as needed]
+
+## Flow Descriptions
+Each flow is described in detail below, including steps, decisions, and outcomes.
+
+### Flow 1: [Flow Name]
+
+**Purpose**: [What is the objective of this flow?]
+
+**Steps**:
+1. [Description of step 1]
+2. [Description of step 2]
+3. [Decision point: condition and outcomes]
+4. [Description of step 3]
+5. [End of flow: outcome]
+
+**Expected Result**: [What should happen if the flow completes successfully]
+
+### Flow 2: [Flow Name]
+
+**Purpose**: [What is the objective of this flow?]
+
+**Steps**:
+1. [Description of step 1]
+2. [Description of step 2]
+3. [Description of step 3]
+4. [End of flow: outcome]
+
+**Expected Result**: [What should happen if the flow completes successfully]
+
+[Add more flows as needed]
+
+## Exceptions and Edge Cases
+This section covers scenarios where flows might deviate from the expected path.
+
+### Flow 1: [Flow Name]
+
+**Exception 1**: [Description of the exception]
+**Handling**: [How the application should handle this exception]
+
+**Edge Case 1**: [Description of the edge case]
+**Handling**: [How the application should handle this edge case]
+
+### Flow 2: [Flow Name]
+
+**Exception 1**: [Description of the exception]
+**Handling**: [How the application should handle this exception]
+
+[Add more exceptions and edge cases as needed]
+
+## Dependencies
+The flows described in this document depend on the following:
+
+[Dependency 1, e.g., external API]
+[Dependency 2, e.g., database availability]
+[Dependency 3, e.g., third-party service]
+
+## Assumptions
+The following assumptions were made during the creation of this document:
+
+[Assumption 1, e.g., users have stable internet connection]
+[Assumption 2, e.g., data is available in real-time]
+[Assumption 3, e.g., users are familiar with the application interface]
+
+## Revision History
+
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | [Date] | [Author Name] | Initial draft |
+| 1.1 | [Date] | [Author Name] | Updated flow diagrams |
+
+[Add more revisions as needed]
+
+## How to Use This Template
+
+- Replace the placeholders (e.g., [Insert Application Name], [Flow Name]) with application-specific information.
+- Add or remove sections based on the complexity of your application and the number of flows.
+- Use the "Flow Diagrams" section to include visual representations of the flows. You can use tools like Lucidchart, Draw.io, or even text-based diagrams.
+- In the "Flow Descriptions" section, provide detailed steps for each flow, including any decision points and expected outcomes.
+- Consider all possible exceptions and edge cases to ensure the application handles unexpected scenarios appropriately.
+- Update the "Revision History" section as the document evolves to keep track of changes.
+
+This template is designed to be flexible and adaptable to various types of applications, providing a clear structure for documenting application flows.
+```
+
+## Documentation Best Practices
+
+### Writing Style
+- Use clear, concise language
+- Write for your audience (developers, users, etc.)
+- Use active voice when possible
+- Be consistent with terminology
+
+### Organization
+- Start with an overview
+- Use logical progression from basic to advanced
+- Include examples and code snippets
+- Provide troubleshooting sections
+
+### Maintenance
+- Keep documentation up to date with code changes
+- Review and update regularly
+- Remove outdated information
+- Add new sections as needed
+
+## Security Concerns
+
+### Sensitive Information
+- Never include API keys, passwords, or tokens in documentation
+- Use placeholder values for examples
+- Document security requirements clearly
+- Include security best practices
+
+### Access Control
+- Document authentication requirements
+- Explain authorization levels
+- Provide security guidelines
+- Include security contact information
+
+### Data Privacy
+- Document data handling practices
+- Explain privacy controls
+- Include GDPR compliance information
+- Provide data deletion procedures

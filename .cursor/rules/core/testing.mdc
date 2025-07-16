@@ -1,0 +1,581 @@
+---
+description: Comprehensive guidelines for writing effective tests across all technologies and frameworks.
+alwaysApply: false
+---
+
+# Testing Guidelines
+
+## Overview
+This rule provides comprehensive guidelines for writing effective tests across all technologies and frameworks. It covers unit tests, integration tests, and end-to-end tests with best practices for maintainable test suites.
+
+## Test Types
+
+### Unit Tests
+- Test individual functions, methods, or components in isolation
+- Fast execution and high reliability
+- Focus on business logic and edge cases
+- Mock external dependencies
+- Check response types in happy path and error paths
+- Test roles or permissions
+- Test data validation
+- Test error handling
+- Test performance
+- Test domain rules and security. E.g. user can't update the resource if it's not owned by the owner user.
+- Test edge cases
+
+### Integration Tests
+- Test interactions between multiple components or services
+- Verify data flow and API contracts
+- Use test databases with data isolation or mocked external services
+- Test error scenarios and edge cases
+- Test roles or permissions
+- Check the correct state of the system after the test
+
+### End-to-End Tests
+- Test complete user workflows
+- Verify system behavior from user perspective
+- Use real browsers or mobile simulators
+- Focus on critical user journeys
+- Test roles or permissions
+- Check the correct state of the system after the test
+
+## Test Structure
+
+### AAA Pattern (Arrange, Act, Assert)
+```typescript
+// ✅ Good: Clear AAA structure
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      // Arrange
+      const userData = {
+        email: 'test@example.com',
+        password: 'securePassword123'
+      };
+      
+      // Act
+      const result = await userService.createUser(userData);
+      
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.email).toBe(userData.email);
+    });
+  });
+});
+```
+
+### Test Organization
+```typescript
+// ✅ Good: Logical test organization
+describe('UserService', () => {
+  describe('createUser', () => {
+    describe('with valid data', () => {
+      it('should create user successfully');
+      it('should return user with generated ID');
+      it('should hash password before saving');
+    });
+    
+    describe('with invalid data', () => {
+      it('should throw validation error for invalid email');
+      it('should throw validation error for weak password');
+      it('should throw error for duplicate email');
+    });
+    
+    describe('edge cases', () => {
+      it('should handle concurrent user creation');
+      it('should handle database connection errors');
+    });
+  });
+});
+```
+
+## Naming Conventions
+
+### Test File Names
+```typescript
+// ✅ Good: Descriptive test file names
+user.service.spec.ts
+authentication.controller.spec.ts
+user-profile.component.spec.tsx
+
+// ❌ Bad: Unclear names
+test.ts
+spec.ts
+user.test.ts
+```
+
+### Test Names
+```typescript
+// ✅ Good: Descriptive test names
+it('should return 404 when user is not found');
+it('should validate email format before saving');
+it('should handle concurrent user creation');
+it('should hash password using bcrypt');
+
+// ❌ Bad: Unclear test names
+it('should work');
+it('test 1');
+it('user test');
+it('creates user');
+```
+
+## Test Data Management
+
+### Test Factories
+```typescript
+// ✅ Good: Use factories for test data
+const userFactory = async ({
+  databaseService,
+  jwtService,
+  override = {},
+}: UserFactoryParams) => {
+  const mock = userMock();
+
+  const user = await databaseService.user.create({
+    data: {
+      ...mock,
+      ...override,
+    },
+  });
+
+  const generateToken = () => {
+    return jwtService.sign({
+      id: user.id,
+    });
+  };
+
+  return {
+    user,
+    generateToken,
+  };
+};
+
+// Usage
+const { user, generateToken } = userFactory({ email: 'custom@example.com' });
+```
+
+### Test Databases
+```typescript
+// ✅ Good: Use test databases
+// Use test databases with data isolation or mocked external services
+beforeEach(async () => {
+  await setupTestDatabase();
+  await seedTestData();
+});
+
+afterEach(async () => {
+  await cleanupTestDatabase();
+});
+
+afterAll(async () => {
+  await closeTestDatabase();
+});
+```
+
+### Database assertions
+```typescript
+// ✅ Good: Database assertions
+const response = await userService.createUser(userData);
+expect(response.id).toBeDefined();
+
+const createdUser = await databaseService.user.findUnique({
+  where: {
+    id: response.id,
+  },
+});
+
+expect(createdUser).toMatchObject({
+  email: userData.email,
+  password: expect.any(String),
+  createdAt: expect.any(Date),
+  updatedAt: expect.any(Date),
+  deletedAt: null,
+});
+```
+
+## Mocking and Stubbing
+
+### External Dependencies
+```typescript
+// ✅ Good: Mock external services
+const mockEmailService = {
+  sendWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendPasswordReset: jest.fn().mockResolvedValue(true),
+};
+
+const mockPaymentService = {
+  processPayment: jest.fn().mockResolvedValue({ success: true }),
+  refundPayment: jest.fn().mockResolvedValue({ success: true }),
+};
+```
+
+## Assertions
+
+### Clear Assertions
+```typescript
+// ✅ Good: Specific assertions
+expect(result).toBeDefined();
+expect(result.email).toBe(userData.email);
+expect(result.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining(userData));
+expect(mockRepository.save).toHaveBeenCalledTimes(1);
+
+// ❌ Bad: Vague assertions
+expect(result).toBeTruthy();
+expect(result).toBeDefined();
+expect(mockRepository.save).toHaveBeenCalled();
+```
+
+### Custom Matchers
+```typescript
+// ✅ Good: Custom matchers for complex assertions
+expect(user).toMatchUserSchema();
+expect(response).toHaveValidApiResponse();
+expect(error).toBeValidationError();
+```
+
+## Error Testing
+
+### Exception Testing
+```typescript
+// ✅ Good: Test specific exceptions
+it('should throw ValidationError for invalid email', async () => {
+  const invalidUserData = userMock({ 
+    override: {
+      email: 'invalid-email'
+    }
+  });
+  
+  await expect(userService.createUser(invalidUserData))
+    .rejects
+    .toThrow(ValidationError);
+  
+  await expect(userService.createUser(invalidUserData))
+    .rejects
+    .toThrow('Invalid email format');
+});
+```
+
+### Error Scenarios
+```typescript
+// ✅ Good: Test various error scenarios
+describe('error handling', () => {
+  it('should handle database connection errors');
+  it('should handle network timeouts');
+  it('should handle invalid API responses');
+  it('should handle concurrent modification errors');
+  it('should handle invalid input data');
+  it('should handle missing required fields');
+  it('should handle invalid data types');
+  it('should handle invalid data formats');
+  it('should handle invalid data values');
+  it('should handle invalid data ranges');
+});
+```
+
+## Performance Testing
+
+### Test Performance
+```typescript
+// ✅ Good: Test performance requirements
+it('should complete user creation within 100ms', async () => {
+  const startTime = Date.now();
+  
+  await userService.createUser(validUserData);
+  
+  const endTime = Date.now();
+  expect(endTime - startTime).toBeLessThan(100);
+});
+```
+
+### Load Testing
+```typescript
+// ✅ Good: Test under load
+it('should handle 100 concurrent user creations', async () => {
+  const promises = Array.from({ length: 100 }, () =>
+    userService.createUser(createValidUserData())
+  );
+  
+  const results = await Promise.all(promises);
+  expect(results).toHaveLength(100);
+  expect(results.every(r => r.id)).toBe(true);
+});
+```
+
+## Integration Testing
+
+### API Testing
+```typescript
+// ✅ Good: Test API endpoints
+describe('POST /api/users', () => {
+  it('should create user successfully', async () => {
+    const validUserData = userMock();
+    
+    const response = await request(app)
+      .post('/api/users')
+      .send(validUserData)
+      .expect(201);
+    
+    expect(response.body).toMatchObject({
+      id: expect.any(String),
+      email: validUserData.email,
+      createdAt: expect.any(String),
+    });
+
+    const createdUser = await databaseService.user.findUnique({
+      where: {
+        id: response.body.id,
+      },
+    });
+
+    expect(createdUser).toMatchObject(validUserData);
+  });
+  
+  it('should return 400 for invalid data', async () => {
+    const invalidUserData = userMock({
+      override: {
+        email: 'invalid-email',
+      },
+    });
+
+    const response = await request(app)
+      .post('/api/users')
+      .send(invalidUserData)
+      .expect(400);
+    
+    expect(response.body).toMatchObject({
+      error: 'Validation failed',
+      details: expect.arrayContaining([
+        expect.objectContaining({ field: 'email' })
+      ])
+    });
+  });
+});
+```
+
+### Database Integration
+```typescript
+// ✅ Good: Test database operations
+describe('UserRepository', () => {
+  it('should save and retrieve user', async () => {
+    const userData = userMock();
+    const savedUser = await userRepository.save(userData);
+    
+    const retrievedUser = await userRepository.findById(savedUser.id);
+
+    const createdUser = await databaseService.user.findUnique({
+      where: {
+        id: savedUser.id,
+      },
+    });
+
+    expect(createdUser).toMatchObject({
+      email: userData.email,
+      password: userData.password,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+      deletedAt: null,
+    });
+  });
+});
+```
+
+## End-to-End Testing
+
+### User Workflows
+```typescript
+// ✅ Good: Test complete user journeys
+describe('User Registration Flow', () => {
+  it('should complete full registration process', async () => {
+    // Navigate to registration page
+    await page.goto('/register');
+    
+    // Fill registration form
+    await page.fill('[data-testid="email"]', 'test@example.com');
+    await page.fill('[data-testid="password"]', 'securePassword123');
+    await page.click('[data-testid="submit"]');
+    
+    // Verify successful registration
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.locator('[data-testid="welcome-message"]'))
+      .toContainText('Welcome, test@example.com');
+
+    const createdUser = await databaseService.user.findUnique({
+      where: {
+        email: 'test@example.com',
+      },
+    });
+
+    expect(createdUser).toMatchObject({
+      email: 'test@example.com',
+      password: expect.any(String),
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+      deletedAt: null,
+    });
+  });
+});
+```
+
+### Cross-Browser Testing
+```typescript
+// ✅ Good: Test across browsers
+describe('Cross-browser compatibility', () => {
+  it.each(['chromium', 'firefox', 'webkit'])(
+    'should work in %s',
+    async (browserType) => {
+      const browser = await playwright[browserType].launch();
+      const page = await browser.newPage();
+      
+      // Test implementation
+      
+      await browser.close();
+    }
+  );
+});
+```
+
+## Test Coverage
+
+### Coverage Requirements
+```typescript
+// ✅ Good: Maintain high coverage
+// Aim for at least 80% line coverage
+// 100% coverage for critical business logic
+// Test all error paths and edge cases
+```
+
+### Coverage Reports
+```typescript
+// ✅ Good: Generate coverage reports
+// jest --coverage
+// nyc --reporter=html
+// istanbul report
+```
+
+## Test Environment
+
+### Environment Setup
+```typescript
+// ✅ Good: Proper test environment
+// .env.test
+DATABASE_URL=postgresql://test:test@localhost:5432/test_db
+NODE_ENV=test
+LOG_LEVEL=error
+```
+
+### Test Configuration
+```typescript
+// ✅ Good: Test-specific configuration
+const testConfig = {
+  database: {
+    url: process.env.TEST_DATABASE_URL,
+    pool: { min: 1, max: 1 }
+  },
+  api: {
+    timeout: 5000,
+    retries: 1
+  }
+};
+```
+
+## Edge Cases
+
+### Boundary Testing
+```typescript
+// ✅ Good: Test boundary conditions
+describe('boundary conditions', () => {
+  it('should handle empty input arrays');
+  it('should handle maximum input sizes');
+  it('should handle null/undefined values');
+  it('should handle special characters in input');
+});
+```
+
+### Concurrency Testing
+```typescript
+// ✅ Good: Test concurrent operations
+it('should handle concurrent user updates', async () => {
+  const userId = 'user-123';
+  const promises = Array.from({ length: 10 }, () =>
+    userService.updateUser(userId, { lastLogin: new Date() })
+  );
+  
+  const results = await Promise.all(promises);
+  expect(results).toHaveLength(10);
+});
+```
+
+## Security Testing
+
+### Input Validation
+```typescript
+// ✅ Good: Test security vulnerabilities
+describe('security', () => {
+  it('should prevent SQL injection');
+  it('should prevent XSS attacks');
+  it('should validate file uploads');
+  it('should handle authentication properly');
+});
+```
+
+### Authentication Testing
+```typescript
+// ✅ Good: Test authentication flows
+describe('authentication', () => {
+  it('should reject invalid tokens');
+  it('should handle expired tokens');
+  it('should prevent unauthorized access');
+  it('should log security events');
+});
+```
+
+## Test Maintenance
+
+### Test Independence
+```typescript
+// ✅ Good: Independent tests
+beforeEach(async () => {
+  await setupTestData();
+});
+
+afterEach(async () => {
+  await cleanupTestData();
+});
+```
+
+### Test Documentation
+```typescript
+// ✅ Good: Document complex tests
+/**
+ * Tests the user registration flow with email verification.
+ * This test verifies that:
+ * 1. User can register with valid data
+ * 2. Verification email is sent
+ * 3. User can verify email and access dashboard
+ */
+it('should complete registration with email verification', async () => {
+  // Test implementation
+});
+```
+
+## Security Concerns
+
+### Test Data Security
+- Never use real user data in tests. Use test data factories to create test data.
+- Use fake data generators (faker.js, etc.) to create test data.
+- Ensure test databases are isolated.
+- Clean up sensitive test data.
+
+### Test Environment Security
+- Use separate test environments.
+- Isolate test databases.
+- Use test-specific API keys.
+- Implement proper access controls.
+
+### Vulnerability Testing
+- Test for common vulnerabilities.
+- Validate input sanitization.
+- Test authentication and authorization.
+- Verify secure communication protocols.
+

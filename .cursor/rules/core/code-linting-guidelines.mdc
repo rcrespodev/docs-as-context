@@ -1,0 +1,176 @@
+---
+description: Comprehensive linting standards for all programming languages and frameworks.
+globs:
+alwaysApply: false
+---
+
+# Linting Standards
+
+## Overview
+This rule defines comprehensive linting standards for all programming languages and frameworks. It covers code style, best practices, error prevention, and automated code quality enforcement.
+
+## Linting Configuration
+
+### ESLint for JavaScript/TypeScript
+```json
+// .eslintrc.json
+{
+  "extends": [
+    "eslint:recommended",
+    "@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "security",
+    "import"
+  ],
+  "rules": {
+    // Code Quality
+    "no-unused-vars": "error",
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-alert": "error",
+    
+    // Security
+    "security/detect-object-injection": "error",
+    "security/detect-non-literal-regexp": "error",
+    "security/detect-unsafe-regex": "error",
+    
+    // Best Practices
+    "prefer-const": "error",
+    "no-var": "error",
+    "no-multiple-empty-lines": "error",
+    "no-trailing-spaces": "error",
+    
+    // TypeScript
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/explicit-function-return-type": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/prefer-interface": "error"
+  }
+}
+```
+
+### Prettier Configuration
+```json
+// .prettierrc
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "bracketSpacing": true,
+  "arrowParens": "avoid"
+}
+```
+
+## Code Style Rules
+
+### Naming Conventions
+- Use camelCase for variable names
+- Use camelCase for function names
+- Use PascalCase for class names
+- Use kebab-case for file names
+- Use CONSTANT_CASE for environment variables
+
+## Error Prevention
+
+### Unused Variables
+```typescript
+// ✅ Good: Remove unused variables
+const activeUsers = users.filter(user => user.isActive);
+const inactiveUsers = users.filter(user => !user.isActive);
+
+// ❌ Bad: Unused variables
+const activeUsers = users.filter(user => user.isActive);
+const inactiveUsers = users.filter(user => !user.isActive);
+const allUsers = users; // Unused variable
+```
+
+### Unused Imports
+```typescript
+// ✅ Good: Only import what you use
+import { useState, useEffect } from 'react';
+import { UserService } from '../services/UserService';
+
+// ❌ Bad: Unused imports
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { UserService, ProductService, OrderService } from '../services';
+```
+
+### Console Statements
+```typescript
+// ✅ Good: Use proper logging
+import logger from '../utils/logger';
+
+logger.info('User created successfully', { userId });
+logger.error('Failed to create user', { error, userId });
+
+// ❌ Bad: Console statements in production
+console.log('User created successfully');
+console.error('Failed to create user', error);
+```
+
+### No Multiple Empty Lines
+```typescript
+// ✅ Good: Consistent spacing
+const user = getUser();
+const profile = getProfile(user.id);
+
+function processUser(user: User) {
+  // Implementation
+}
+
+// ❌ Bad: Excessive empty lines
+const user = getUser();
+
+
+const profile = getProfile(user.id);
+
+
+function processUser(user: User) {
+  // Implementation
+}
+```
+
+## Documentation
+
+### JSDoc
+```typescript
+// ✅ Good: Proper JSDoc comments
+/**
+ * Creates a new user with the provided data.
+ * 
+ * @param userData - The user data to create the account with
+ * @returns Promise<User> - The created user object
+ * @throws ValidationError - When user data is invalid
+ * @throws DuplicateUserError - When user already exists
+ */
+async function createUser(userData: CreateUserRequest): Promise<User> {
+  // Implementation
+}
+
+// ❌ Bad: Missing or incomplete JSDoc
+function createUser(userData: CreateUserRequest): Promise<User> {
+  // Implementation
+}
+```
+
+### Inline Comments
+```typescript
+// ✅ Good: Meaningful comments
+// Use exponential backoff to handle rate limiting
+const delay = Math.pow(2, attempt) * 1000;
+
+// Skip validation for admin users
+if (user.role === 'admin') {
+  return true;
+}
+
+// ❌ Bad: Obvious or missing comments
+const delay = 1000; // Set delay to 1000ms
+if (user.role === 'admin') return true; // No explanation
+```

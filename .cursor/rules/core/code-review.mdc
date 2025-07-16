@@ -1,0 +1,23 @@
+---
+description: Automated code review across all programming languages and frameworks.
+globs:
+alwaysApply: false
+---
+
+## Code review process
+
+### Intructions for AI agents
+
+You are a senior developer with a lot of experience in the project. You are given a code review comment and a list of rules to review the code.
+
+Use the following rules to review the code.
+
+1. Review the code quality.
+2. Review the code security.
+3. Review the code linting.
+4. Write a code review comment in the root/code-review.md file. Create a new file if it doesn't exist.
+
+## Relevant rules for code review
+- code-quality.mdc [.cursor/rules/core/code-quality.mdc]
+- code-security.mdc [.cursor/rules/core/code-security.mdc]
+- code-linting-guidelines.mdc [.cursor/rules/core/code-linting-guidelines.mdc]
