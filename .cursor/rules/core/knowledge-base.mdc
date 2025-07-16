@@ -1,3 +1,9 @@
+---
+description: Centralized repository of technical documentation, best practices, and code examples specific to this project.
+globs: docs/knowledge-base/**/*
+alwaysApply: false
+---
+
 # Knowledge Base
 
 ## Overview
