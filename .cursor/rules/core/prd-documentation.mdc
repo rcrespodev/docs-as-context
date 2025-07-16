@@ -1,0 +1,357 @@
+---
+description: Template for writing Product Requirements Document (PRD)
+globs: docs/prd.md
+alwaysApply: false
+---
+
+# Product Requirements Document (PRD) Template
+
+## Overview
+This rule provides a comprehensive template for creating Product Requirements Document (PRD) in markdown format. It ensures consistent structure, clear requirements, and proper stakeholder alignment.
+
+## Instructions for AI Agent
+1. Create PRD documentation in a markdown file (in `docs/prd.md` or `docs/domain/prd.md`)
+2. Use this template to document product requirements for the project
+3. Include clear objectives, success criteria, and target audience
+4. Define features with priorities and detailed specifications
+5. Document assumptions, constraints, and risks
+6. Include schedule, milestones, and stakeholder approvals
+7. If documentation is not written in the same language as the code, translate it to the code language
+
+## Template Structure
+
+### Document Header
+```markdown
+# Product Requirements Document (PRD)
+
+- Project Name: [Insert Project Name]
+- Date: [Insert Date]
+- Version: [Insert Version Number]
+
+## Purpose
+This document describes the requirements and specifications for [Project Name]. It serves as a guide for the development team and stakeholders, ensuring alignment on project objectives and deliverables.
+```
+
+### Objectives and Success Criteria Section
+```markdown
+## Objectives
+The primary objectives of [Project Name] are:
+
+[Goal 1, e.g., improve user experience]
+[Goal 2, e.g., increase efficiency]
+[Goal 3, e.g., expand market reach]
+
+## Success Criteria
+The success of [Project Name] will be measured by:
+
+[Metric 1, e.g., increase user engagement by X%]
+[Metric 2, e.g., reduce processing time by Y minutes]
+[Metric 3, e.g., reach Z number of new users]
+```
+
+### Target Audience Section
+```markdown
+## Target Audience
+The target audience for [Project Name] includes:
+
+[User Group 1, e.g., existing customers]
+[User Group 2, e.g., potential new users]
+[User Group 3, e.g., internal teams]
+
+Their key needs and pain points are:
+
+[Need/Pain Point 1]
+[Need/Pain Point 2]
+[Need/Pain Point 3]
+```
+
+### Features and Requirements Section
+```markdown
+## Features and Requirements
+The following features are required for [Project Name]:
+
+### Feature 1: [Description of Feature 1]
+
+**Priority**: [Required / Desirable]
+**Details**: [Additional details or specifications]
+**Acceptance Criteria**:
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+- [ ] [Criterion 3]
+
+**Technical Requirements**:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+### Feature 2: [Description of Feature 2]
+
+**Priority**: [Required / Desirable]
+**Details**: [Additional details or specifications]
+**Acceptance Criteria**:
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+- [ ] [Criterion 3]
+
+**Technical Requirements**:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+### Feature 3: [Description of Feature 3]
+
+**Priority**: [Required / Desirable]
+**Details**: [Additional details or specifications]
+**Acceptance Criteria**:
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+- [ ] [Criterion 3]
+
+**Technical Requirements**:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+[Add more features as needed]
+```
+
+### Assumptions and Constraints Section
+```markdown
+## Assumptions and Constraints
+
+### Assumptions:
+
+[Assumption 1, e.g., users have basic technical knowledge]
+[Assumption 2, e.g., integration with existing systems is possible]
+[Assumption 3, e.g., users have access to modern browsers]
+[Assumption 4, e.g., internet connectivity is available]
+
+### Constraints:
+
+[Constraint 1, e.g., budget limitations]
+[Constraint 2, e.g., time constraints]
+[Constraint 3, e.g., technical limitations]
+[Constraint 4, e.g., regulatory requirements]
+```
+
+### Schedule and Milestones Section
+```markdown
+## Schedule and Milestones
+
+### Phase 1: [Phase Name] - [Start Date] to [End Date]
+- [Milestone 1, e.g., completion of the design phase] - [Expected Date]
+- [Milestone 2, e.g., completion of core features] - [Expected Date]
+- [Milestone 3, e.g., internal testing] - [Expected Date]
+
+### Phase 2: [Phase Name] - [Start Date] to [End Date]
+- [Milestone 1, e.g., beta release] - [Expected Date]
+- [Milestone 2, e.g., user acceptance testing] - [Expected Date]
+- [Milestone 3, e.g., final release] - [Expected Date]
+
+### Phase 3: [Phase Name] - [Start Date] to [End Date]
+- [Milestone 1, e.g., production deployment] - [Expected Date]
+- [Milestone 2, e.g., monitoring and optimization] - [Expected Date]
+- [Milestone 3, e.g., feature enhancements] - [Expected Date]
+```
+
+### Risks and Mitigations Section
+```markdown
+## Risks and Mitigations
+
+### Risk 1: [Description of the risk]
+
+**Impact**: [High / Medium / Low]
+**Probability**: [High / Medium / Low]
+**Mitigation**: [How to mitigate the risk]
+**Contingency Plan**: [What to do if risk materializes]
+
+### Risk 2: [Description of the risk]
+
+**Impact**: [High / Medium / Low]
+**Probability**: [High / Medium / Low]
+**Mitigation**: [How to mitigate the risk]
+**Contingency Plan**: [What to do if risk materializes]
+
+### Risk 3: [Description of the risk]
+
+**Impact**: [High / Medium / Low]
+**Probability**: [High / Medium / Low]
+**Mitigation**: [How to mitigate the risk]
+**Contingency Plan**: [What to do if risk materializes]
+
+[Add more risks as needed]
+```
+
+### Dependencies Section
+```markdown
+## Dependencies
+
+### Technical Dependencies:
+[Dependency 1, e.g., third-party API integration]
+[Dependency 2, e.g., database migration]
+[Dependency 3, e.g., infrastructure setup]
+
+### Business Dependencies:
+[Dependency 1, e.g., stakeholder approval]
+[Dependency 2, e.g., legal compliance review]
+[Dependency 3, e.g., budget approval]
+
+### External Dependencies:
+[Dependency 1, e.g., vendor delivery]
+[Dependency 2, e.g., regulatory approval]
+[Dependency 3, e.g., market research completion]
+```
+
+### Approvals Section
+```markdown
+## Approvals
+This document requires approval from the following stakeholders:
+
+### Product Team:
+- [Stakeholder 1, e.g., Product Manager] - [Date] - [Signature]
+- [Stakeholder 2, e.g., Product Owner] - [Date] - [Signature]
+
+### Engineering Team:
+- [Stakeholder 1, e.g., Engineering Lead] - [Date] - [Signature]
+- [Stakeholder 2, e.g., Technical Architect] - [Date] - [Signature]
+
+### Business Team:
+- [Stakeholder 1, e.g., Business Analyst] - [Date] - [Signature]
+- [Stakeholder 2, e.g., Marketing Director] - [Date] - [Signature]
+
+### Executive Team:
+- [Stakeholder 1, e.g., CTO] - [Date] - [Signature]
+- [Stakeholder 2, e.g., CEO] - [Date] - [Signature]
+```
+
+### Revision History Section
+```markdown
+## Revision History
+
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | [Date] | [Author Name] | Initial draft |
+| 1.1 | [Date] | [Author Name] | Added feature specifications |
+| 1.2 | [Date] | [Author Name] | Updated success criteria |
+| 1.3 | [Date] | [Author Name] | Added risk assessment |
+
+[Add more revisions as needed]
+```
+
+### Usage Instructions Section
+```markdown
+## How to Use This Template
+
+- Replace the placeholders (e.g., [Insert Project Name], [Objective 1]) with project-specific information.
+- Add or remove sections based on the complexity and requirements of your project.
+- Use the "Features and Requirements" section to list all required and desirable features, making sure to include a clear description and priority.
+- Customize the "Success Criteria" to define measurable results aligned with project objectives.
+- Update the "Schedule and Milestones" to reflect key project phases and deadlines.
+- Ensure all stakeholders review and approve the document before development begins.
+- Update the document as requirements evolve throughout the project lifecycle.
+
+This template is designed to be adaptable to various types of projects, providing a clear structure and alignment among stakeholders.
+```
+
+## Best Practices
+
+### 1. Requirements Writing
+- **Clear and Unambiguous**: Use precise, measurable language
+- **User-Centric**: Focus on user needs and benefits
+- **Prioritized**: Clearly indicate feature priorities
+- **Testable**: Include acceptance criteria for each feature
+- **Traceable**: Link requirements to business objectives
+
+### 2. Stakeholder Management
+- **Inclusive**: Involve all relevant stakeholders
+- **Transparent**: Share information openly
+- **Consistent**: Use consistent terminology
+- **Approved**: Get formal approval from key stakeholders
+
+### 3. Risk Management
+- **Proactive**: Identify risks early
+- **Comprehensive**: Cover technical, business, and external risks
+- **Actionable**: Provide specific mitigation strategies
+- **Monitored**: Track risks throughout the project
+
+## Examples
+
+### Good Feature Description
+```markdown
+### Feature 1: User Authentication System
+
+**Priority**: Required
+**Details**: Implement secure user authentication with email/password login, password reset functionality, and session management.
+
+**Acceptance Criteria**:
+- [ ] Users can register with email and password
+- [ ] Users can log in with valid credentials
+- [ ] Users can reset password via email
+- [ ] Sessions expire after 24 hours of inactivity
+- [ ] Failed login attempts are rate-limited
+
+**Technical Requirements**:
+- JWT token-based authentication
+- Password hashing with bcrypt
+- Email service integration
+- Rate limiting implementation
+- Session management
+```
+
+### Good Risk Assessment
+```markdown
+### Risk 1: Third-party API integration delays
+
+**Impact**: Medium
+**Probability**: Medium
+**Mitigation**: Start integration early, have backup API options, maintain buffer in schedule
+**Contingency Plan**: Implement mock API responses for development, negotiate with vendor for expedited delivery
+```
+
+## Security Considerations
+
+### 1. Data Protection
+- Define data classification requirements
+- Specify encryption requirements
+- Document access control policies
+- Address privacy regulations (GDPR, CCPA)
+
+### 2. Authentication and Authorization
+- Define user role requirements
+- Specify authentication methods
+- Document authorization rules
+- Address session management
+
+### 3. API Security
+- Define API security requirements
+- Specify input validation rules
+- Document rate limiting policies
+- Address CORS and CSP requirements
+
+## Performance Considerations
+
+### 1. Response Time Requirements
+- Define acceptable response times
+- Specify throughput requirements
+- Document scalability requirements
+- Address caching strategies
+
+### 2. Resource Requirements
+- Define hardware requirements
+- Specify database performance
+- Document network requirements
+- Address monitoring needs
+
+## Testing Strategy
+
+### 1. Test Planning
+- Define test scope and objectives
+- Specify test environments
+- Document test data requirements
+- Address automation strategy
+
+### 2. Quality Assurance
+- Define quality metrics
+- Specify acceptance criteria
+- Document defect management
+- Address release criteria

@@ -1,0 +1,761 @@
+# Knowledge Base
+
+## Overview
+This rule maintains a centralized repository of technical documentation, best practices, and code examples specific to this project. It serves as a reference for AI agents to understand project-specific patterns, decisions, and implementations.
+
+## Project Architecture
+
+### System Overview
+[Describe the overall system architecture, including main components and their relationships]
+
+### Technology Stack
+- **Frontend**: [List frontend technologies]
+- **Backend**: [List backend technologies]
+- **Database**: [List database technologies]
+- **Infrastructure**: [List infrastructure technologies]
+- **DevOps**: [List DevOps tools]
+
+### Key Design Decisions
+- [Document important architectural decisions and their rationale]
+- [Include links to ADRs (Architecture Decision Records) if available]
+
+## Domain Knowledge
+
+### Business Domain
+[Describe the core business domain, key entities, and business rules]
+
+### Key Entities
+```typescript
+// Example: User entity structure
+interface User {
+  id: string;
+  email: string;
+  profile: UserProfile;
+  permissions: Permission[];
+  // ... other fields
+}
+```
+
+### Business Rules
+- [List important business rules and constraints]
+- [Document validation rules]
+- [Include workflow rules]
+
+## Code Patterns
+
+### Project-Specific Patterns
+[Document patterns that are specific to this project]
+
+#### Service Pattern
+```typescript
+// ✅ Good: Service Pattern Example
+interface UserService {
+  createUser(userData: CreateUserRequest): Promise<User>;
+  getUserById(id: string): Promise<User | null>;
+  updateUser(id: string, userData: UpdateUserRequest): Promise<User>;
+  deleteUser(id: string): Promise<void>;
+}
+
+class UserServiceImpl implements UserService {
+  constructor(
+    private userRepository: UserRepository,
+    private eventBus: EventBus
+  ) {}
+
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    // Validate input
+    const validatedData = await this.validateUserData(userData);
+    
+    // Create user in transaction
+    const user = await this.userRepository.create(validatedData);
+    
+    // Publish event
+    await this.eventBus.publish('user.created', { userId: user.id });
+    
+    return user;
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    return await this.userRepository.findById(id);
+  }
+
+  async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
+    const existingUser = await this.getUserById(id);
+    if (!existingUser) {
+      throw new NotFoundError('User not found');
+    }
+    
+    const updatedUser = await this.userRepository.update(id, userData);
+    await this.eventBus.publish('user.updated', { userId: id });
+    
+    return updatedUser;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const user = await this.getUserById(id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    
+    await this.userRepository.delete(id);
+    await this.eventBus.publish('user.deleted', { userId: id });
+  }
+
+  private async validateUserData(data: CreateUserRequest): Promise<ValidatedUserData> {
+    // Implementation of validation logic
+    return validatedData;
+  }
+}
+```
+
+#### React Component Pattern
+```typescript
+// ✅ Good: Well-structured React component
+interface UserProfileProps {
+  userId: string;
+  onEdit?: (user: User) => void;
+  onDelete?: (userId: string) => void;
+}
+
+export function UserProfile({ userId, onEdit, onDelete }: UserProfileProps) {
+  const { data: user, isLoading, error } = useUser(userId);
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
+
+  const handleEdit = useCallback(() => {
+    if (user && onEdit) {
+      onEdit(user);
+    }
+  }, [user, onEdit]);
+
+  const handleDelete = useCallback(() => {
+    if (onDelete) {
+      onDelete(userId);
+    }
+  }, [userId, onDelete]);
+
+  if (isLoading) {
+    return <UserProfileSkeleton />;
+  }
+
+  if (error) {
+    return <ErrorMessage error={error} />;
+  }
+
+  if (!user) {
+    return <NotFound message="User not found" />;
+  }
+
+  return (
+    <div className="user-profile">
+      <UserProfileHeader user={user} />
+      <UserProfileDetails user={user} />
+      <UserProfileActions
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    </div>
+  );
+}
+```
+
+#### Custom Hooks Pattern
+```typescript
+// ✅ Good: Custom hook for data fetching
+export function useUser(userId: string) {
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => userService.getUserById(userId),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000 // 10 minutes
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (userData: UpdateUserRequest) => 
+      userService.updateUser(userData.id, userData),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['user', updatedUser.id], updatedUser);
+      queryClient.invalidateQueries(['users']);
+    },
+    onError: (error) => {
+      console.error('Failed to update user:', error);
+    }
+  });
+}
+```
+
+#### Authentication Pattern
+```typescript
+// In this project, authentication is handled through JWT tokens
+// stored in httpOnly cookies. Use the AuthService for consistency.
+const authService = new AuthService();
+const user = await authService.getCurrentUser();
+```
+
+#### API Response Pattern
+```typescript
+// All API responses follow this structure
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+```
+
+#### Error Handling Pattern
+```typescript
+// Use the centralized error handler
+try {
+  const result = await operation();
+  return { success: true, data: result };
+} catch (error) {
+  return handleError(error);
+}
+```
+
+### Database Patterns
+[Document database-specific patterns and conventions]
+
+#### Migration Naming
+```
+// Migrations follow the pattern: YYYYMMDD_HHMMSS_description.sql
+// Example: 20240101_120000_create_users_table.sql
+```
+
+#### Query Patterns
+```sql
+-- Use parameterized queries for all database operations
+SELECT * FROM users WHERE id = ? AND status = ?
+```
+
+### Frontend Patterns
+[Document frontend-specific patterns]
+
+#### Component Structure
+```typescript
+// Components follow this structure
+interface ComponentProps {
+  // Props interface
+}
+
+export function ComponentName({ prop1, prop2 }: ComponentProps) {
+  // 1. Hooks
+  // 2. Event handlers
+  // 3. Render logic
+  return (
+    // JSX
+  );
+}
+```
+
+#### State Management
+```typescript
+// Use the centralized state management pattern
+const { state, dispatch } = useAppState();
+```
+
+## Configuration
+
+### Environment Variables
+[Document all environment variables and their purposes]
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
+
+# Authentication
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=24h
+
+# External Services
+API_BASE_URL=https://api.example.com
+```
+
+### Build Configuration
+[Document build-specific configurations]
+
+### Deployment Configuration
+[Document deployment-specific settings]
+
+## Common Issues and Solutions
+
+### Known Issues
+[Document common issues and their solutions]
+
+#### Issue 1: Database Connection Timeout
+**Problem**: Database connections timeout after 30 seconds
+**Solution**: Use connection pooling and implement retry logic
+**Code Example**:
+```typescript
+const dbConfig = {
+  pool: {
+    min: 2,
+    max: 10,
+    acquireTimeoutMillis: 30000,
+    createTimeoutMillis: 30000,
+  }
+};
+```
+
+#### Issue 2: Memory Leaks in React Components
+**Problem**: Components not cleaning up subscriptions
+**Solution**: Always use cleanup functions in useEffect
+**Code Example**:
+```typescript
+useEffect(() => {
+  const subscription = dataStream.subscribe(handleData);
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+### Troubleshooting Guide
+[Document common troubleshooting steps]
+
+#### Common React Issues
+
+**Issue**: Component re-rendering unnecessarily
+**Solution**: Use React.memo, useMemo, and useCallback appropriately
+**Code Example**:
+```typescript
+// ✅ Good: Prevent unnecessary re-renders
+const ExpensiveComponent = React.memo(({ data }) => {
+  const processedData = useMemo(() => processData(data), [data]);
+  const handleClick = useCallback(() => handleAction(data), [data]);
+  
+  return <div onClick={handleClick}>{processedData}</div>;
+});
+```
+
+**Issue**: Memory leaks in useEffect
+**Solution**: Always clean up subscriptions and timers
+**Code Example**:
+```typescript
+// ✅ Good: Proper cleanup
+useEffect(() => {
+  const subscription = dataStream.subscribe(handleData);
+  const timer = setInterval(updateData, 1000);
+  
+  return () => {
+    subscription.unsubscribe();
+    clearInterval(timer);
+  };
+}, []);
+```
+
+#### Common API Issues
+
+**Issue**: Race conditions in API calls
+**Solution**: Use AbortController for request cancellation
+**Code Example**:
+```typescript
+// ✅ Good: Cancel previous requests
+const useApiCall = (url: string) => {
+  const [data, setData] = useState(null);
+  
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    fetch(url, { signal: abortController.signal })
+      .then(response => response.json())
+      .then(setData)
+      .catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error('API call failed:', error);
+        }
+      });
+    
+    return () => abortController.abort();
+  }, [url]);
+  
+  return data;
+};
+```
+
+**Issue**: API response caching issues
+**Solution**: Implement proper cache invalidation
+**Code Example**:
+```typescript
+// ✅ Good: Proper cache management
+const useUserData = (userId: string) => {
+  const queryClient = useQueryClient();
+  
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => userService.getById(userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+    onSuccess: (data) => {
+      // Update related queries
+      queryClient.setQueryData(['users'], (old) => 
+        old?.map(user => user.id === userId ? data : user)
+      );
+    }
+  });
+};
+```
+
+#### Common Database Issues
+
+**Issue**: N+1 query problem
+**Solution**: Use eager loading and batch queries
+**Code Example**:
+```typescript
+// ❌ Bad: N+1 queries
+const users = await userRepository.findAll();
+for (const user of users) {
+  user.profile = await profileRepository.findByUserId(user.id);
+}
+
+// ✅ Good: Batch query
+const users = await userRepository.findAllWithProfiles();
+```
+
+**Issue**: Database connection timeouts
+**Solution**: Implement connection pooling and retry logic
+**Code Example**:
+```typescript
+// ✅ Good: Connection pooling
+const dbConfig = {
+  pool: {
+    min: 2,
+    max: 10,
+    acquireTimeoutMillis: 30000,
+    createTimeoutMillis: 30000,
+    destroyTimeoutMillis: 5000,
+    idleTimeoutMillis: 30000,
+    reapIntervalMillis: 1000,
+    createRetryIntervalMillis: 100,
+  }
+};
+```
+
+#### Common State Management Issues
+
+**Issue**: State updates causing infinite loops
+**Solution**: Use proper dependency arrays and state update functions
+**Code Example**:
+```typescript
+// ❌ Bad: Infinite loop
+useEffect(() => {
+  setCount(count + 1);
+}, [count]);
+
+// ✅ Good: Proper state update
+useEffect(() => {
+  setCount(prev => prev + 1);
+}, []); // Empty dependency array
+```
+
+**Issue**: Stale closures in event handlers
+**Solution**: Use useCallback with proper dependencies
+**Code Example**:
+```typescript
+// ❌ Bad: Stale closure
+const handleClick = () => {
+  console.log(user.name); // user might be stale
+};
+
+// ✅ Good: Fresh closure
+const handleClick = useCallback(() => {
+  console.log(user.name);
+}, [user.name]);
+```
+
+## Performance Guidelines
+
+### Database Performance
+[Document database performance best practices]
+
+#### Indexing Strategy
+```sql
+-- Always index foreign keys and frequently queried columns
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_orders_user_id ON orders(user_id);
+```
+
+#### Query Optimization
+```sql
+-- Use EXPLAIN to analyze query performance
+EXPLAIN SELECT * FROM users WHERE email = 'user@example.com';
+```
+
+### Frontend Performance
+[Document frontend performance best practices]
+
+#### Code Splitting
+```typescript
+// Use dynamic imports for route-based code splitting
+const LazyComponent = lazy(() => import('./LazyComponent'));
+```
+
+#### Memoization
+```typescript
+// Use React.memo for expensive components
+const ExpensiveComponent = React.memo(({ data }) => {
+  return <div>{processData(data)}</div>;
+});
+```
+
+## Security Guidelines
+
+### Authentication
+[Document authentication-specific security measures]
+
+#### Password Requirements
+```typescript
+// Passwords must meet these criteria
+const passwordRequirements = {
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSpecialChars: true,
+};
+```
+
+#### Session Management
+```typescript
+// Sessions expire after 24 hours
+const sessionConfig = {
+  expiresIn: '24h',
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+};
+```
+
+### Data Validation
+[Document data validation patterns]
+
+```typescript
+// Use centralized validation schemas
+const userSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(2),
+});
+```
+
+## Testing Guidelines
+
+### Test Structure
+[Document testing patterns and conventions]
+
+#### Unit Test Pattern
+```typescript
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create a user with valid data', async () => {
+      // Arrange
+      const userData = { email: 'test@example.com', password: 'password123' };
+      
+      // Act
+      const result = await userService.createUser(userData);
+      
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.email).toBe(userData.email);
+    });
+  });
+});
+```
+
+#### Integration Test Pattern
+```typescript
+describe('User API', () => {
+  it('should create user via API', async () => {
+    const response = await request(app)
+      .post('/api/users')
+      .send({ email: 'test@example.com', password: 'password123' });
+    
+    expect(response.status).toBe(201);
+    expect(response.body.data.email).toBe('test@example.com');
+  });
+});
+```
+
+## External Dependencies
+
+### Third-Party Services
+[Document external services and their integration]
+
+#### Payment Service
+```typescript
+// Use Stripe for payment processing
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+```
+
+#### Email Service
+```typescript
+// Use SendGrid for email delivery
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+```
+
+### API Integrations
+[Document external API integrations]
+
+#### External API Pattern
+```typescript
+// All external API calls use this pattern
+const apiClient = new ApiClient({
+  baseURL: process.env.EXTERNAL_API_URL,
+  timeout: 5000,
+  retries: 3,
+});
+```
+
+## Development Workflow
+
+### Git Workflow
+[Document Git workflow and conventions]
+
+#### Branch Naming
+```
+feature/user-authentication
+bugfix/login-error
+hotfix/security-patch
+```
+
+#### Commit Message Format
+```
+feat: add user authentication
+fix: resolve login error
+docs: update API documentation
+```
+
+### Code Review Process
+[Document code review guidelines]
+
+#### Review Checklist
+- [ ] Code follows project patterns
+- [ ] Tests are included
+- [ ] Documentation is updated
+- [ ] Security considerations addressed
+
+## Monitoring and Logging
+
+### Logging Strategy
+[Document logging patterns and levels]
+
+```typescript
+// Use structured logging
+logger.info('User created', { userId: user.id, email: user.email });
+logger.error('Database connection failed', { error: error.message });
+```
+
+### Monitoring Metrics
+[Document key metrics to monitor]
+
+- Response time
+- Error rate
+- Database connection pool usage
+- Memory usage
+
+## Deployment
+
+### Environment-Specific Configurations
+[Document environment-specific settings]
+
+#### Development
+```bash
+NODE_ENV=development
+LOG_LEVEL=debug
+DATABASE_URL=postgresql://localhost:5432/dev_db
+```
+
+#### Production
+```bash
+NODE_ENV=production
+LOG_LEVEL=info
+DATABASE_URL=postgresql://prod-server:5432/prod_db
+```
+
+### Deployment Checklist
+[Document deployment requirements]
+
+- [ ] All tests passing
+- [ ] Environment variables configured
+- [ ] Database migrations applied
+- [ ] Health checks implemented
+
+## Maintenance
+
+### Regular Maintenance Tasks
+[Document maintenance procedures]
+
+#### Database Maintenance
+```sql
+-- Run weekly to clean up old data
+DELETE FROM sessions WHERE expires_at < NOW() - INTERVAL '30 days';
+```
+
+#### Log Rotation
+```bash
+# Rotate logs daily
+logrotate /etc/logrotate.d/app-logs
+```
+
+### Backup Procedures
+[Document backup strategies]
+
+#### Database Backup
+```bash
+# Daily backup
+pg_dump database_name > backup_$(date +%Y%m%d).sql
+```
+
+## References
+
+### Documentation Links
+- [API Documentation](link-to-api-docs)
+- [Architecture Documentation](link-to-arch-docs)
+- [Deployment Guide](link-to-deploy-docs)
+
+### External Resources
+- [Technology Documentation](link-to-tech-docs)
+- [Best Practices](link-to-best-practices)
+- [Troubleshooting Guides](link-to-troubleshooting)
+
+## Glossary
+
+### Technical Terms
+[Define project-specific technical terms]
+
+- **ADR**: Architecture Decision Record
+- **BFF**: Backend for Frontend
+- **DDD**: Domain-Driven Design
+
+### Business Terms
+[Define business-specific terms]
+
+- **User**: A registered user of the system
+- **Session**: A user's active login session
+- **Permission**: A specific action a user can perform
+
+## Updates and Maintenance
+
+### Version History
+[Track changes to this knowledge base]
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2024-01-01 | Initial version |
+| 1.1 | 2024-01-15 | Added security guidelines |
+
+### Contributing
+[Guidelines for updating this knowledge base]
+
+- Update this document when making architectural changes
+- Include code examples for new patterns
+- Document any new external dependencies
+- Update troubleshooting section with new issues
+description:
+globs:
+alwaysApply: false
+---

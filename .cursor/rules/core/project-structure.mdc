@@ -1,0 +1,445 @@
+---
+description: Universal standards for organizing monorepo projects with multiple applications and shared packages.
+alwaysApply: true
+---
+
+# Project Structure Guidelines
+
+## Overview
+This rule defines universal standards for organizing monorepo projects with multiple applications and shared packages. It provides a flexible template that teams can customize for their specific technology stacks and requirements.
+
+## Monorepo Architecture
+
+This project structure utilizes a monorepo architecture with **Turborepo** and **pnpm workspaces** to manage multiple applications and shared packages efficiently.
+
+### Core Structure
+
+```
+project-root/
+├── apps/                    # Main applications
+│   ├── api/                # Backend API
+│   ├── web/                # Frontend Web application
+│   ├── mobile/             # Mobile application
+│   └── admin/              # Admin dashboard (optional)
+├── packages/               # Shared packages
+│   ├── database/           # Database layer and ORM
+│   ├── types/              # Shared TypeScript types
+│   ├── ui/                 # Shared UI components
+│   ├── utils/              # Shared utilities
+│   ├── config/             # Shared configurations
+│   └── api-client/         # API client library
+├── docs/                   # Project documentation
+├── scripts/                # Build and deployment scripts
+├── docker/                 # Docker configurations
+├── .github/                # GitHub Actions and workflows
+├── tools/                  # Development tools and scripts
+└── tests/                  # End-to-end and integration tests
+```
+
+## Applications (apps/)
+
+### Backend API (`apps/api/`)
+- **Framework**: NestJS, Express, Fastify, or similar
+- **Database**: PostgreSQL, MySQL, MongoDB with ORM
+- **Structure**:
+  ```
+  apps/api/
+  ├── src/
+  │   ├── modules/          # Application modules
+  │   ├── common/           # Shared utilities
+  │   ├── config/           # Configuration files
+  │   ├── middleware/       # Custom middleware
+  │   ├── guards/           # Authentication guards
+  │   ├── interceptors/     # Request/response interceptors
+  │   └── main.ts           # Application entry point
+  ├── test/                 # API tests
+  ├── migrations/           # Database migrations
+  └── .env.*               # Environment variables
+  ```
+
+### Web Frontend (`apps/web/`)
+- **Framework**: Next.js, React, Vue, or similar
+- **UI**: Tailwind CSS, Material-UI, or similar
+- **Structure**:
+  ```
+  apps/web/
+  ├── app/                  # App Router (Next.js 13+)
+  │   ├── (auth)/          # Authentication routes
+  │   ├── (dashboard)/     # Dashboard routes
+  │   ├── api/             # API routes
+  │   └── globals.css      # Global styles
+  ├── components/           # Reusable components
+  ├── lib/                  # Utilities and configurations
+  ├── hooks/                # Custom hooks
+  ├── store/                # State management
+  ├── types/                # TypeScript types
+  └── public/               # Static assets
+  ```
+
+### Mobile Application (`apps/mobile/`)
+- **Framework**: React Native, Flutter, or similar
+- **UI**: NativeWind, React Native Paper, or similar
+- **Structure**:
+  ```
+  apps/mobile/
+  ├── app/                  # App router (Expo Router)
+  ├── components/           # Native components
+  ├── screens/              # Application screens
+  ├── navigation/           # Navigation configuration
+  ├── hooks/                # Custom hooks
+  ├── context/              # Context providers
+  ├── services/             # API services
+  ├── utils/                # Helper functions
+  └── assets/               # Images, fonts, etc.
+  ```
+
+### Admin Dashboard (`apps/admin/`) - Optional
+- **Framework**: React, Vue, or similar
+- **Purpose**: Administrative interface
+- **Structure**: Similar to web frontend with admin-specific components
+
+## Shared Packages (packages/)
+
+### Database (`packages/database/`)
+- **Responsibility**: Database management and ORM
+- **Content**:
+  - Database schema
+  - Migrations
+  - Seeds
+  - Generated ORM client
+- **Structure**:
+  ```
+  packages/database/
+  ├── src/
+  │   ├── schema/           # Database schema
+  │   ├── migrations/       # Database migrations
+  │   ├── seeds/            # Seed data
+  │   └── client/           # Generated client
+  ├── prisma/               # Prisma configuration
+  └── package.json
+  ```
+
+### Types (`packages/types/`)
+- **Responsibility**: Shared TypeScript types
+- **Usage**: Define interfaces and types common across apps
+- **Structure**:
+  ```
+  packages/types/
+  ├── src/
+  │   ├── api/             # API types
+  │   ├── common/          # Common types
+  │   ├── entities/        # Entity types
+  │   └── index.ts         # Main exports
+  └── package.json
+  ```
+
+### UI Components (`packages/ui/`)
+- **Responsibility**: Shared UI components
+- **Usage**: Reusable components across applications
+- **Structure**:
+  ```
+  packages/ui/
+  ├── src/
+  │   ├── components/       # UI components
+  │   ├── hooks/           # Component hooks
+  │   ├── utils/           # Component utilities
+  │   └── index.ts         # Main exports
+  ├── stories/             # Storybook stories
+  └── package.json
+  ```
+
+### Utils (`packages/utils/`)
+- **Responsibility**: Shared utility functions
+- **Usage**: Common helper functions and utilities
+- **Structure**:
+  ```
+  packages/utils/
+  ├── src/
+  │   ├── validation/      # Validation utilities
+  │   ├── formatting/      # Formatting utilities
+  │   ├── date/            # Date utilities
+  │   └── index.ts         # Main exports
+  └── package.json
+  ```
+
+### Config (`packages/config/`)
+- **Responsibility**: Shared configurations
+- **Usage**: ESLint, TypeScript, and other shared configs
+- **Structure**:
+  ```
+  packages/config/
+  ├── eslint/              # ESLint configuration
+  ├── typescript/          # TypeScript configuration
+  ├── prettier/            # Prettier configuration
+  └── package.json
+  ```
+
+### API Client (`packages/api-client/`)
+- **Responsibility**: API client library
+- **Usage**: Typed API client for frontend applications
+- **Structure**:
+  ```
+  packages/api-client/
+  ├── src/
+  │   ├── endpoints/        # API endpoints
+  │   ├── types/           # API types
+  │   ├── client.ts        # API client
+  │   └── index.ts         # Main exports
+  └── package.json
+  ```
+
+## Naming Conventions
+
+### Folders and Files
+- **Folders**: kebab-case (e.g., `native-app`, `api-client`)
+- **Files**: kebab-case for configs, camelCase for code
+- **Components**: PascalCase (e.g., `UserProfile.tsx`)
+- **Hooks**: camelCase with `use` prefix (e.g., `useAuth.ts`)
+- **Services**: camelCase with service suffix (e.g., `userService.ts`)
+
+### Packages
+- **Apps**: `@project/[app-name]` (e.g., `@project/api`)
+- **Packages**: `@project/[package-name]` (e.g., `@project/database`)
+
+## Dependency Management
+
+### Workspaces
+- **pnpm workspaces** for dependency management
+- **Turborepo** for build optimization and caching
+- **Shared dependencies** in common packages
+
+### Installing Dependencies
+```bash
+# Dependency in specific app
+pnpm add react --filter @project/web
+
+# Dependency in package
+pnpm add lodash --filter @project/utils
+
+# Development dependency
+pnpm add -D typescript --filter @project/api
+
+# Internal package dependency
+pnpm add @project/types --filter @project/api
+```
+
+## Scripts and Commands
+
+### Root Commands
+```bash
+pnpm dev                    # Full development (all apps)
+pnpm dev:api               # API only
+pnpm dev:web               # Web only
+pnpm dev:mobile            # Mobile only
+pnpm build                 # Build all apps
+pnpm test                  # Test all apps
+pnpm lint                  # Lint entire project
+pnpm format                # Format code
+pnpm clean                 # Clean all builds
+```
+
+### Database Commands
+```bash
+pnpm db:generate           # Generate ORM client
+pnpm db:migrate            # Run migrations
+pnpm db:seed               # Run seeds
+pnpm db:studio             # Open database studio
+pnpm db:reset              # Reset database
+```
+
+### Package Commands
+```bash
+pnpm build:packages        # Build all packages
+pnpm test:packages         # Test all packages
+pnpm publish:packages      # Publish packages
+```
+
+## Environment Variables
+
+### Environment Structure
+- `.env`: Global monorepo variables
+- `.env.development`: Development variables
+- `.env.production`: Production variables
+- `.env.testing`: Testing variables
+
+### App-Specific .env Files
+```
+apps/api/.env.development
+apps/api/.env.production
+apps/web/.env.local
+apps/mobile/.env.development
+```
+
+## Development Patterns
+
+### Creating a New API Module
+1. Create folder in `apps/api/src/modules/[module-name]/`
+2. Implement schema in shared types package
+3. Implement controller, service, entity
+4. Register in main module
+5. Add tests in `apps/api/test/[module-name].spec.ts`
+
+### Creating a New Component
+1. Create in `apps/[app]/components/[ComponentName].tsx`
+2. Add to shared UI package if reusable
+3. Use in corresponding screens/pages
+
+### Creating a New Package
+1. Create folder in `packages/[package-name]/`
+2. Configure `package.json` with name `@project/[package-name]`
+3. Add to `pnpm-workspace.yaml`
+4. Implement functionality and export from `src/index.ts`
+
+## Testing Strategy
+
+### Test Structure
+```
+project-root/
+├── apps/
+│   ├── api/
+│   │   ├── test/          # Unit tests
+│   │   └── e2e/           # End-to-end tests
+│   └── web/
+│       ├── __tests__/     # Unit tests
+│       └── e2e/           # End-to-end tests
+├── packages/
+│   └── [package]/
+│       └── __tests__/     # Package tests
+└── tests/                 # Integration tests
+```
+
+### Testing Commands
+```bash
+pnpm test:unit             # Unit tests
+pnpm test:e2e              # End-to-end tests
+pnpm test:integration      # Integration tests
+pnpm test:coverage         # Coverage report
+```
+
+## Deployment
+
+### Environments
+- **Development**: Local development
+- **Staging**: Testing environment
+- **Production**: Production environment
+
+### Environment Configuration
+- Environment-specific variables
+- Database configurations
+- External service URLs
+- Feature flags
+
+## Development Tools
+
+### Code Quality
+- **ESLint**: Shared configuration in `packages/config/eslint/`
+- **Prettier**: Automatic code formatting
+- **Husky**: Git hooks for pre-commit
+- **Lint-staged**: Lint only staged files
+
+### TypeScript
+- **Base configuration**: `packages/config/typescript/`
+- **Strict mode**: Enabled in all apps
+- **Path mapping**: Configured for clean imports
+
+### Build Tools
+- **Turborepo**: Build system and caching
+- **Vite/Webpack**: Application bundlers
+- **SWC**: Fast TypeScript compilation
+
+## Edge Cases and Considerations
+
+### Circular Dependencies
+- Avoid circular dependencies between packages
+- Use interfaces instead of concrete implementations
+- Extract common logic to shared packages
+
+### Versioning
+- **Semantic versioning** for releases
+- **Changelog** automation with conventional commits
+- **Release automation** with GitHub Actions
+
+### Performance
+- **Turborepo caching** for fast builds
+- **Tree shaking** in production builds
+- **Code splitting** in web and mobile apps
+
+## AI Agent Commands
+
+### Structure Verification
+```bash
+# List workspaces
+pnpm list --depth=0
+
+# List workspace dependencies
+pnpm list --filter @project/api
+
+# Show folder structure
+tree -I node_modules -L 3
+```
+
+### Quick Development
+```bash
+# Create new component
+mkdir -p apps/web/components/NewComponent
+touch apps/web/components/NewComponent/index.tsx
+
+# Create new API module
+mkdir -p apps/api/src/modules/new-module
+touch apps/api/src/modules/new-module/new-module.module.ts
+touch apps/api/src/modules/new-module/new-module.controller.ts
+touch apps/api/src/modules/new-module/new-module.service.ts
+touch apps/api/test/new-module.controller.spec.ts
+
+# Create new package
+mkdir -p packages/new-package/src
+touch packages/new-package/package.json
+touch packages/new-package/src/index.ts
+```
+
+### Debugging
+```bash
+# View development logs
+pnpm dev --verbose
+
+# Check Turborepo configuration
+npx turbo run --dry-run
+
+# Analyze dependencies
+pnpm why [package-name]
+```
+
+## Security Considerations
+
+### Environment Variables
+- Never commit sensitive data to version control
+- Use environment-specific .env files
+- Validate environment variables at startup
+
+### Package Security
+- Regular dependency updates
+- Security audits with `pnpm audit`
+- Lock file integrity checks
+
+### Access Control
+- Implement proper authentication
+- Use role-based access control
+- Validate all user inputs
+
+## Performance Guidelines
+
+### Build Optimization
+- Use Turborepo for parallel builds
+- Implement proper caching strategies
+- Optimize bundle sizes
+
+### Runtime Performance
+- Implement code splitting
+- Use lazy loading for components
+- Optimize database queries
+
+### Monitoring
+- Set up performance monitoring
+- Track build times
+- Monitor bundle sizes
+

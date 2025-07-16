@@ -1,0 +1,367 @@
+---
+description: Template for writing user stories
+globs: docs/domain/user-stories/**/*.md
+alwaysApply: false
+---
+
+# User Stories Documentation Template
+
+## Overview
+This rule provides a comprehensive template for creating user stories documentation in markdown format. It ensures consistent structure, clear acceptance criteria, and proper mapping to technical features.
+
+## Instructions for AI Agent
+1. Create user stories in a markdown file (in root/docs/domain/user-stories/). Use a descriptive name relevant to the feature (e.g., `USER_STORIES_LOGIN.md`)
+- Use this template to write user stories for the project.
+- Use the standard user story format (As a... I want... So that...) to maintain clarity and focus on the user.
+- Define clear and verifiable Acceptance Criteria for each story, ensuring developers and testers know when the story is complete.
+- Map each story to Implementation Features to facilitate translation of user needs to technical tasks.
+- Include Exceptions and Edge Cases to anticipate problems and define how to handle them.
+- Update the Revision History to reflect changes in the document.
+- If user stories are not written in the same language as the code, translate them to the code language.
+
+## Template Structure
+
+### Document Header
+```markdown
+# User Stories Document
+
+- Project Name: [Insert Project Name]
+- Date: [Insert Date]
+- Version: [Insert Version Number]
+
+## Purpose
+This document describes the user stories for [Project Name]. Each story represents a need or functionality from the user's perspective, including acceptance criteria to ensure implementations meet requirements. Stories are also mapped to technical features to facilitate development.
+
+## User Roles
+The main user roles for [Project Name] are:
+
+Role 1: [Description of the role, e.g., End Customer]
+Role 2: [Description of the role, e.g., System Administrator]
+[Add more roles as needed]
+
+## User Story Format
+Each user story follows the standard format:
+**As a [user type], I want [action or functionality], so that [benefit or purpose].**
+```
+
+### User Story Template
+```markdown
+## User Story 1: [Story Title]
+
+**ID**: [US-001]
+**Description**: As a [user type], I want [action or functionality], so that [benefit or purpose].
+
+**Example**: As a customer, I want to register with my email address, so that I can access my personalized account.
+
+**Priority**: [High / Medium / Low]
+**Story Points**: [1, 2, 3, 5, 8, 13, 21]
+
+**Acceptance Criteria**:
+- [ ] [Criterion 1, e.g., User can enter a valid email address and receive a confirmation message.]
+- [ ] [Criterion 2, e.g., System validates that the email is not already registered.]
+- [ ] [Criterion 3, e.g., Registration form is accessible from the home page.]
+- [ ] [Criterion 4, e.g., User receives welcome email after successful registration.]
+
+**Implementation Features**:
+- [Feature 1, e.g., Create API endpoint for user registration.]
+- [Feature 2, e.g., Design registration form in user interface.]
+- [Feature 3, e.g., Implement email validation in backend.]
+- [Feature 4, e.g., Set up email service integration.]
+
+**Technical Requirements**:
+- Database: User table with email, password_hash, created_at fields
+- API: POST /api/auth/register endpoint
+- Frontend: Registration form component
+- Validation: Email format and uniqueness validation
+- Security: Password hashing with bcrypt
+
+**Dependencies**:
+- [Dependency 1, e.g., Authentication system setup]
+- [Dependency 2, e.g., Email service configuration]
+
+**Definition of Done**:
+- [ ] All acceptance criteria are met
+- [ ] Code is reviewed and approved
+- [ ] Unit tests are written and passing
+- [ ] Integration tests are written and passing
+- [ ] Documentation is updated
+- [ ] Feature is deployed to staging environment
+```
+
+### Multiple User Stories Example
+```markdown
+## User Stories
+
+### User Story 1: User Registration
+
+**ID**: US-001
+**Description**: As a customer, I want to register with my email address, so that I can access my personalized account.
+
+**Priority**: High
+**Story Points**: 5
+
+**Acceptance Criteria**:
+- [ ] User can enter a valid email address and receive a confirmation message
+- [ ] System validates that the email is not already registered
+- [ ] Registration form is accessible from the home page
+- [ ] User receives welcome email after successful registration
+- [ ] Password meets security requirements (minimum 8 characters, includes numbers and special characters)
+
+**Implementation Features**:
+- Create API endpoint for user registration
+- Design registration form in user interface
+- Implement email validation in backend
+- Set up email service integration
+- Implement password strength validation
+
+**Technical Requirements**:
+- Database: User table with email, password_hash, created_at fields
+- API: POST /api/auth/register endpoint
+- Frontend: Registration form component
+- Validation: Email format and uniqueness validation
+- Security: Password hashing with bcrypt
+
+### User Story 2: User Login
+
+**ID**: US-002
+**Description**: As a registered user, I want to log in with my credentials, so that I can access my account and personalized content.
+
+**Priority**: High
+**Story Points**: 3
+
+**Acceptance Criteria**:
+- [ ] User can enter email and password to log in
+- [ ] System validates credentials and grants access
+- [ ] User is redirected to dashboard after successful login
+- [ ] Failed login attempts show appropriate error messages
+- [ ] User session is maintained across browser sessions
+
+**Implementation Features**:
+- Create login API endpoint
+- Design login form component
+- Implement session management
+- Add error handling for invalid credentials
+- Set up JWT token generation
+
+**Technical Requirements**:
+- API: POST /api/auth/login endpoint
+- Frontend: Login form component
+- Authentication: JWT token-based authentication
+- Session: Token storage in localStorage or httpOnly cookies
+- Security: Rate limiting for login attempts
+```
+
+### Exceptions and Edge Cases
+```markdown
+## Exceptions and Edge Cases
+This section covers exceptional scenarios related to user stories.
+
+### User Story 1: User Registration
+
+**Exception 1**: User enters invalid email format
+**Handling**: Display clear error message with email format requirements and allow retry
+
+**Exception 2**: Email service is down
+**Handling**: Queue email for later delivery and show success message to user
+
+**Exception 3**: Database connection fails
+**Handling**: Show system error message and provide contact information for support
+
+**Edge Case 1**: User tries to register with email containing special characters
+**Handling**: Properly sanitize and validate email input
+
+**Edge Case 2**: Multiple users try to register with same email simultaneously
+**Handling**: Implement database-level unique constraint and handle race conditions
+
+### User Story 2: User Login
+
+**Exception 1**: User enters incorrect password
+**Handling**: Show generic error message (don't specify if email or password is wrong)
+
+**Exception 2**: User account is locked due to multiple failed attempts
+**Handling**: Show account locked message with instructions for unlocking
+
+**Exception 3**: JWT token expires during session
+**Handling**: Automatically refresh token or redirect to login page
+
+**Edge Case 1**: User logs in from multiple devices
+**Handling**: Allow multiple sessions or implement session management policy
+
+**Edge Case 2**: Network connection is slow
+**Handling**: Show loading indicator and implement timeout handling
+```
+
+### Dependencies and Assumptions
+```markdown
+## Dependencies
+The user stories described depend on the following:
+
+[Dependency 1, e.g., Availability of an authentication system.]
+[Dependency 2, e.g., Integration with a specific database.]
+[Dependency 3, e.g., Third-party services for notifications.]
+[Dependency 4, e.g., Email service provider setup.]
+[Dependency 5, e.g., SSL certificate for secure connections.]
+
+## Assumptions
+The following assumptions were made:
+
+[Assumption 1, e.g., Users have access to a modern browser.]
+[Assumption 2, e.g., Backend infrastructure is operational.]
+[Assumption 3, e.g., Users are familiar with basic interface concepts.]
+[Assumption 4, e.g., Internet connection is available.]
+[Assumption 5, e.g., Users can read and understand the interface language.]
+```
+
+### Revision History
+```markdown
+## Revision History
+
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | [Date] | [Author Name] | Initial draft |
+| 1.1 | [Date] | [Author Name] | Added additional stories |
+| 1.2 | [Date] | [Author Name] | Updated acceptance criteria |
+| 1.3 | [Date] | [Author Name] | Added technical requirements |
+
+[Add more revisions as needed]
+```
+
+### Usage Instructions
+```markdown
+## How to Use This Template
+
+- Replace the placeholders (e.g., [Project Name], [US-001], [Story Title]) with project-specific information.
+- Use the standard user story format (As a... I want... So that...) to maintain clarity and focus on the user.
+- Define clear and verifiable Acceptance Criteria for each story, ensuring developers and testers know when the story is complete.
+- Map each story to Implementation Features to facilitate translation of user needs to technical tasks.
+- Include Exceptions and Edge Cases to anticipate problems and define how to handle them.
+- Update the Revision History to reflect changes in the document.
+- Add or remove stories based on project needs, maintaining focus on user roles and their objectives.
+
+This template is designed to be adaptable to any project, providing a clear structure for defining user stories and connecting them to implementable features.
+```
+
+## Best Practices
+
+### 1. User Story Writing
+- **User-Centric**: Focus on user value and benefits
+- **Clear and Concise**: Use simple, understandable language
+- **Independent**: Each story should be self-contained
+- **Negotiable**: Allow for discussion and refinement
+- **Valuable**: Provide clear business value
+- **Estimable**: Can be sized for development effort
+- **Small**: Keep stories manageable (1-2 weeks of work)
+
+### 2. Acceptance Criteria
+- **Specific**: Clear, unambiguous requirements
+- **Testable**: Can be verified through testing
+- **Complete**: Cover all scenarios and edge cases
+- **User-Focused**: Written from user perspective
+- **Measurable**: Clear success/failure criteria
+
+### 3. Technical Mapping
+- **Traceable**: Link stories to technical features
+- **Detailed**: Include specific implementation requirements
+- **Realistic**: Consider technical constraints and dependencies
+- **Maintainable**: Document for future reference
+
+### 4. Exception Handling
+- **Comprehensive**: Cover all possible failure scenarios
+- **User-Friendly**: Provide clear error messages and recovery options
+- **Robust**: Handle edge cases gracefully
+- **Secure**: Consider security implications
+
+## Examples
+
+### Good User Story
+```markdown
+**ID**: US-003
+**Description**: As a customer, I want to reset my password, so that I can regain access to my account if I forget my credentials.
+
+**Priority**: High
+**Story Points**: 3
+
+**Acceptance Criteria**:
+- [ ] User can request password reset from login page
+- [ ] System sends reset link to registered email address
+- [ ] Reset link expires after 24 hours
+- [ ] User can set new password using reset link
+- [ ] Old password is invalidated after reset
+- [ ] User receives confirmation email after successful reset
+
+**Implementation Features**:
+- Create password reset request endpoint
+- Implement email service for reset links
+- Design password reset form
+- Add token-based reset link generation
+- Implement password update functionality
+```
+
+### Bad User Story
+```markdown
+**ID**: US-004
+**Description**: Create a login system with authentication.
+
+**Priority**: High
+
+**Acceptance Criteria**:
+- [ ] System works
+- [ ] Users can log in
+
+**Implementation Features**:
+- Build login system
+```
+
+## Security Considerations
+
+### 1. Authentication Stories
+- Implement proper password policies
+- Use secure authentication methods
+- Handle session management securely
+- Implement rate limiting for login attempts
+
+### 2. Data Protection Stories
+- Encrypt sensitive data
+- Implement proper access controls
+- Handle user data according to privacy regulations
+- Secure API endpoints
+
+### 3. Input Validation Stories
+- Validate all user inputs
+- Prevent injection attacks
+- Sanitize data before processing
+- Implement proper error handling
+
+## Performance Considerations
+
+### 1. Response Time
+- Define acceptable response times
+- Implement caching where appropriate
+- Optimize database queries
+- Use pagination for large datasets
+
+### 2. Scalability
+- Consider system load and capacity
+- Plan for user growth
+- Implement efficient algorithms
+- Use appropriate data structures
+
+## Testing Strategy
+
+### 1. Unit Testing
+- Test individual story components
+- Mock external dependencies
+- Cover all acceptance criteria
+- Test edge cases and exceptions
+
+### 2. Integration Testing
+- Test story interactions
+- Verify API endpoints
+- Test database operations
+- Validate user workflows
+
+### 3. User Acceptance Testing
+- Test complete user journeys
+- Validate business requirements
+- Test with real users
+- Gather feedback and iterate

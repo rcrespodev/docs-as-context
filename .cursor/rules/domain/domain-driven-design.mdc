@@ -1,0 +1,898 @@
+---
+description: Comprehensive guidelines for implementing Domain-Driven Design (DDD) patterns.
+globs: apps/api/src/**/*.ts, apps/api/src/**/*.prisma, apps/api/src/**/*.md
+alwaysApply: false
+---
+
+# Domain-Driven Design (DDD) Guidelines
+
+## Overview
+This rule defines comprehensive guidelines for implementing Domain-Driven Design (DDD) patterns. It covers aggregates, entities, value objects, repositories, domain services, and domain events with practical examples and best practices.
+
+## Core DDD Concepts
+
+### 1. Ubiquitous Language
+- Use consistent terminology across code, documentation, and conversations
+- Domain terms should match business vocabulary
+- Avoid technical jargon in domain models
+- Keep language aligned with business experts
+
+### 2. Bounded Contexts
+- Define clear boundaries for different parts of the domain
+- Each bounded context has its own ubiquitous language
+- Minimize coupling between bounded contexts
+- Use context maps to show relationships
+
+### 3. Strategic Design
+- Identify core domains vs supporting domains
+- Focus effort on core business capabilities
+- Use anti-corruption layers for external systems
+- Maintain clear domain boundaries
+
+## Tactical Design Patterns
+
+### Aggregates
+
+#### Aggregate Root Pattern
+```typescript
+// ✅ Good: Aggregate Root Example
+interface OrderAggregate {
+  id: OrderId;
+  customerId: CustomerId;
+  status: OrderStatus;
+  items: OrderItem[];
+  total: Money;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+class Order implements OrderAggregate {
+  private _id: OrderId;
+  private _customerId: CustomerId;
+  private _status: OrderStatus;
+  private _items: OrderItem[];
+  private _total: Money;
+  private _version: number;
+  private _createdAt: Date;
+  private _updatedAt: Date;
+  private _domainEvents: DomainEvent[] = [];
+
+  constructor(
+    id: OrderId,
+    customerId: CustomerId,
+    items: OrderItem[] = []
+  ) {
+    this._id = id;
+    this._customerId = customerId;
+    this._status = OrderStatus.DRAFT;
+    this._items = items;
+    this._total = this.calculateTotal();
+    this._version = 0;
+    this._createdAt = new Date();
+    this._updatedAt = new Date();
+  }
+
+  // Public methods that maintain invariants
+  addItem(productId: ProductId, quantity: number, unitPrice: Money): void {
+    if (this._status !== OrderStatus.DRAFT) {
+      throw new Error('Cannot add items to non-draft order');
+    }
+
+    if (this._items.length >= 10) {
+      throw new Error('Order cannot have more than 10 items');
+    }
+
+    const item = new OrderItem(
+      new OrderItemId(),
+      productId,
+      quantity,
+      unitPrice
+    );
+
+    this._items.push(item);
+    this._total = this.calculateTotal();
+    this._updatedAt = new Date();
+    this._version++;
+
+    this.addDomainEvent(new OrderItemAddedEvent(this._id, item));
+  }
+
+  confirm(): void {
+    if (this._status !== OrderStatus.DRAFT) {
+      throw new Error('Only draft orders can be confirmed');
+    }
+
+    if (this._items.length === 0) {
+      throw new Error('Cannot confirm empty order');
+    }
+
+    this._status = OrderStatus.CONFIRMED;
+    this._updatedAt = new Date();
+    this._version++;
+
+    this.addDomainEvent(new OrderConfirmedEvent(this._id));
+  }
+
+  // Private helper methods
+  private calculateTotal(): Money {
+    return this._items.reduce(
+      (total, item) => total.add(item.subtotal),
+      new Money(0, 'USD')
+    );
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this._domainEvents.push(event);
+  }
+
+  // Getters
+  get id(): OrderId { return this._id; }
+  get customerId(): CustomerId { return this._customerId; }
+  get status(): OrderStatus { return this._status; }
+  get items(): ReadonlyArray<OrderItem> { return [...this._items]; }
+  get total(): Money { return this._total; }
+  get version(): number { return this._version; }
+  get domainEvents(): DomainEvent[] { return [...this._domainEvents]; }
+
+  // Clear domain events after persistence
+  clearDomainEvents(): void {
+    this._domainEvents = [];
+  }
+}
+```
+
+#### Aggregate Invariants
+```typescript
+// ✅ Good: Business Rules as Invariants
+class OrderInvariants {
+  static validateAddItem(order: Order, quantity: number, price: Money): void {
+    if (order.status !== OrderStatus.DRAFT) {
+      throw new OrderDomainError('Cannot add items to non-draft order');
+    }
+
+    if (quantity <= 0) {
+      throw new OrderDomainError('Quantity must be positive');
+    }
+
+    if (price.amount <= 0) {
+      throw new OrderDomainError('Price must be positive');
+    }
+
+    if (order.items.length >= 10) {
+      throw new OrderDomainError('Order cannot have more than 10 items');
+    }
+  }
+
+  static validateConfirm(order: Order): void {
+    if (order.status !== OrderStatus.DRAFT) {
+      throw new OrderDomainError('Only draft orders can be confirmed');
+    }
+
+    if (order.items.length === 0) {
+      throw new OrderDomainError('Cannot confirm empty order');
+    }
+  }
+}
+```
+
+### Entities
+
+#### Entity Base Class
+```typescript
+// ✅ Good: Base Entity Class
+abstract class Entity<T> {
+  protected _id: T;
+  protected _version: number;
+  protected _createdAt: Date;
+  protected _updatedAt: Date;
+
+  constructor(id: T) {
+    this._id = id;
+    this._version = 0;
+    this._createdAt = new Date();
+    this._updatedAt = new Date();
+  }
+
+  get id(): T { return this._id; }
+  get version(): number { return this._version; }
+  get createdAt(): Date { return this._createdAt; }
+  get updatedAt(): Date { return this._updatedAt; }
+
+  protected incrementVersion(): void {
+    this._version++;
+    this._updatedAt = new Date();
+  }
+
+  equals(other: Entity<T>): boolean {
+    if (other === null || other === undefined) {
+      return false;
+    }
+
+    if (this === other) {
+      return true;
+    }
+
+    return this._id === other._id;
+  }
+}
+
+// ✅ Good: Concrete Entity Example
+class Customer extends Entity<CustomerId> {
+  private _email: Email;
+  private _name: CustomerName;
+  private _status: CustomerStatus;
+
+  constructor(
+    id: CustomerId,
+    email: Email,
+    name: CustomerName
+  ) {
+    super(id);
+    this._email = email;
+    this._name = name;
+    this._status = CustomerStatus.ACTIVE;
+  }
+
+  updateName(name: CustomerName): void {
+    this._name = name;
+    this.incrementVersion();
+  }
+
+  deactivate(): void {
+    this._status = CustomerStatus.INACTIVE;
+    this.incrementVersion();
+  }
+
+  // Getters
+  get email(): Email { return this._email; }
+  get name(): CustomerName { return this._name; }
+  get status(): CustomerStatus { return this._status; }
+}
+```
+
+### Value Objects
+
+#### Value Object Base Class
+```typescript
+// ✅ Good: Base Value Object Class
+abstract class ValueObject<T> {
+  protected readonly _value: T;
+
+  constructor(value: T) {
+    this._value = value;
+    this.validate();
+  }
+
+  get value(): T { return this._value; }
+
+  protected abstract validate(): void;
+
+  equals(other: ValueObject<T>): boolean {
+    if (other === null || other === undefined) {
+      return false;
+    }
+
+    if (this === other) {
+      return true;
+    }
+
+    return this._value === other._value;
+  }
+
+  toString(): string {
+    return String(this._value);
+  }
+}
+
+// ✅ Good: Money Value Object
+class Money extends ValueObject<{ amount: number; currency: string }> {
+  constructor(amount: number, currency: string) {
+    super({ amount, currency });
+  }
+
+  protected validate(): void {
+    if (this._value.amount < 0) {
+      throw new Error('Money amount cannot be negative');
+    }
+
+    if (!this.isValidCurrency(this._value.currency)) {
+      throw new Error('Invalid currency code');
+    }
+  }
+
+  add(other: Money): Money {
+    if (this._value.currency !== other._value.currency) {
+      throw new Error('Cannot add money with different currencies');
+    }
+
+    return new Money(
+      this._value.amount + other._value.amount,
+      this._value.currency
+    );
+  }
+
+  multiply(factor: number): Money {
+    return new Money(
+      this._value.amount * factor,
+      this._value.currency
+    );
+  }
+
+  private isValidCurrency(currency: string): boolean {
+    const validCurrencies = ['USD', 'EUR', 'GBP', 'JPY'];
+    return validCurrencies.includes(currency);
+  }
+
+  get amount(): number { return this._value.amount; }
+  get currency(): string { return this._value.currency; }
+}
+
+// ✅ Good: Email Value Object
+class Email extends ValueObject<string> {
+  protected validate(): void {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this._value)) {
+      throw new Error('Invalid email format');
+    }
+
+    if (this._value.length > 254) {
+      throw new Error('Email too long');
+    }
+  }
+
+  getDomain(): string {
+    return this._value.split('@')[1];
+  }
+
+  getLocalPart(): string {
+    return this._value.split('@')[0];
+  }
+}
+```
+
+### Repositories
+
+#### Repository Interface
+```typescript
+// ✅ Good: Repository Interface
+interface Repository<T extends Entity<any>, TId> {
+  findById(id: TId): Promise<T | null>;
+  save(entity: T): Promise<void>;
+  delete(id: TId): Promise<void>;
+  exists(id: TId): Promise<boolean>;
+}
+
+// ✅ Good: Aggregate Repository Interface
+interface AggregateRepository<T extends Entity<any>, TId> extends Repository<T, TId> {
+  findByIdWithEvents(id: TId): Promise<{ aggregate: T; events: DomainEvent[] }>;
+  saveWithEvents(aggregate: T): Promise<void>;
+}
+
+// ✅ Good: Order Repository Implementation
+class OrderRepository implements AggregateRepository<Order, OrderId> {
+  constructor(
+    private readonly db: Database,
+    private readonly eventStore: EventStore
+  ) {}
+
+  async findById(id: OrderId): Promise<Order | null> {
+    const orderData = await this.db.orders.findUnique({
+      where: { id: id.value },
+      include: { items: true }
+    });
+
+    if (!orderData) {
+      return null;
+    }
+
+    return this.reconstructOrder(orderData);
+  }
+
+  async findByIdWithEvents(id: OrderId): Promise<{ aggregate: Order; events: DomainEvent[] }> {
+    const [orderData, events] = await Promise.all([
+      this.db.orders.findUnique({
+        where: { id: id.value },
+        include: { items: true }
+      }),
+      this.eventStore.getEvents(id.value)
+    ]);
+
+    if (!orderData) {
+      return { aggregate: null, events: [] };
+    }
+
+    const aggregate = this.reconstructOrder(orderData);
+    return { aggregate, events };
+  }
+
+  async saveWithEvents(order: Order): Promise<void> {
+    await this.db.$transaction(async (tx) => {
+      // Save aggregate
+      await this.saveOrder(order, tx);
+
+      // Save domain events
+      const events = order.domainEvents;
+      for (const event of events) {
+        await this.eventStore.append(event);
+      }
+
+      // Clear domain events
+      order.clearDomainEvents();
+    });
+  }
+
+  async save(order: Order): Promise<void> {
+    await this.saveOrder(order, this.db);
+  }
+
+  async delete(id: OrderId): Promise<void> {
+    await this.db.orders.delete({
+      where: { id: id.value }
+    });
+  }
+
+  async exists(id: OrderId): Promise<boolean> {
+    const count = await this.db.orders.count({
+      where: { id: id.value }
+    });
+    return count > 0;
+  }
+
+  private async saveOrder(order: Order, db: any): Promise<void> {
+    await db.orders.upsert({
+      where: { id: order.id.value },
+      update: {
+        customerId: order.customerId.value,
+        status: order.status,
+        totalAmount: order.total.amount,
+        totalCurrency: order.total.currency,
+        version: order.version,
+        updatedAt: order.updatedAt
+      },
+      create: {
+        id: order.id.value,
+        customerId: order.customerId.value,
+        status: order.status,
+        totalAmount: order.total.amount,
+        totalCurrency: order.total.currency,
+        version: order.version,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      }
+    });
+
+    // Save order items
+    await db.orderItems.deleteMany({
+      where: { orderId: order.id.value }
+    });
+
+    for (const item of order.items) {
+      await db.orderItems.create({
+        data: {
+          id: item.id.value,
+          orderId: order.id.value,
+          productId: item.productId.value,
+          quantity: item.quantity,
+          unitPriceAmount: item.unitPrice.amount,
+          unitPriceCurrency: item.unitPrice.currency
+        }
+      });
+    }
+  }
+
+  private reconstructOrder(data: any): Order {
+    const order = new Order(
+      new OrderId(data.id),
+      new CustomerId(data.customerId)
+    );
+
+    // Reconstruct items
+    for (const itemData of data.items) {
+      const item = new OrderItem(
+        new OrderItemId(itemData.id),
+        new ProductId(itemData.productId),
+        itemData.quantity,
+        new Money(itemData.unitPriceAmount, itemData.unitPriceCurrency)
+      );
+      // Note: This would need to be handled differently in a real implementation
+      // to maintain encapsulation
+    }
+
+    return order;
+  }
+}
+```
+
+### Domain Services
+
+#### Domain Service Pattern
+```typescript
+// ✅ Good: Domain Service Interface
+interface DomainService {
+  execute(...args: any[]): Promise<any>;
+}
+
+// ✅ Good: Order Pricing Service
+class OrderPricingService implements DomainService {
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly discountService: DiscountService
+  ) {}
+
+  async calculateOrderTotal(order: Order): Promise<Money> {
+    let total = new Money(0, 'USD');
+
+    for (const item of order.items) {
+      const product = await this.productRepository.findById(item.productId);
+      if (!product) {
+        throw new Error(`Product ${item.productId.value} not found`);
+      }
+
+      const itemTotal = product.price.multiply(item.quantity);
+      total = total.add(itemTotal);
+    }
+
+    // Apply discounts
+    const discount = await this.discountService.calculateDiscount(order);
+    total = total.subtract(discount);
+
+    return total;
+  }
+
+  async validateOrderPricing(order: Order): Promise<boolean> {
+    const calculatedTotal = await this.calculateOrderTotal(order);
+    return calculatedTotal.equals(order.total);
+  }
+}
+
+// ✅ Good: Customer Credit Service
+class CustomerCreditService implements DomainService {
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+    private readonly orderRepository: OrderRepository
+  ) {}
+
+  async checkCreditLimit(customerId: CustomerId, orderAmount: Money): Promise<boolean> {
+    const customer = await this.customerRepository.findById(customerId);
+    if (!customer) {
+      throw new Error('Customer not found');
+    }
+
+    const currentOrders = await this.orderRepository.findByCustomerId(customerId);
+    const totalSpent = currentOrders
+      .filter(order => order.status === OrderStatus.CONFIRMED)
+      .reduce((total, order) => total.add(order.total), new Money(0, 'USD'));
+
+    const newTotal = totalSpent.add(orderAmount);
+    return newTotal.amount <= customer.creditLimit.amount;
+  }
+}
+```
+
+### Domain Events
+
+#### Domain Event Base Class
+```typescript
+// ✅ Good: Domain Event Base Class
+abstract class DomainEvent {
+  public readonly id: string;
+  public readonly aggregateId: string;
+  public readonly eventType: string;
+  public readonly occurredOn: Date;
+  public readonly version: number;
+
+  constructor(aggregateId: string, version: number) {
+    this.id = crypto.randomUUID();
+    this.aggregateId = aggregateId;
+    this.eventType = this.constructor.name;
+    this.occurredOn = new Date();
+    this.version = version;
+  }
+}
+
+// ✅ Good: Order Domain Events
+class OrderCreatedEvent extends DomainEvent {
+  constructor(
+    aggregateId: string,
+    public readonly customerId: string,
+    public readonly orderData: any
+  ) {
+    super(aggregateId, 1);
+  }
+}
+
+class OrderItemAddedEvent extends DomainEvent {
+  constructor(
+    aggregateId: string,
+    public readonly item: OrderItem
+  ) {
+    super(aggregateId, 1);
+  }
+}
+
+class OrderConfirmedEvent extends DomainEvent {
+  constructor(aggregateId: string) {
+    super(aggregateId, 1);
+  }
+}
+
+// ✅ Good: Event Handler
+interface DomainEventHandler<T extends DomainEvent> {
+  handle(event: T): Promise<void>;
+}
+
+class OrderConfirmedEventHandler implements DomainEventHandler<OrderConfirmedEvent> {
+  constructor(
+    private readonly inventoryService: InventoryService,
+    private readonly notificationService: NotificationService
+  ) {}
+
+  async handle(event: OrderConfirmedEvent): Promise<void> {
+    // Reserve inventory
+    await this.inventoryService.reserveItemsForOrder(event.aggregateId);
+
+    // Send confirmation notification
+    await this.notificationService.sendOrderConfirmation(event.aggregateId);
+  }
+}
+```
+
+## Aggregate Factories
+
+#### Factory Pattern
+```typescript
+// ✅ Good: Aggregate Factory
+class OrderFactory {
+  static createOrder(customerId: CustomerId): Order {
+    const orderId = new OrderId(crypto.randomUUID());
+    return new Order(orderId, customerId);
+  }
+
+  static createOrderWithItems(
+    customerId: CustomerId,
+    items: Array<{ productId: ProductId; quantity: number; unitPrice: Money }>
+  ): Order {
+    const order = this.createOrder(customerId);
+
+    for (const item of items) {
+      order.addItem(item.productId, item.quantity, item.unitPrice);
+    }
+
+    return order;
+  }
+
+  static reconstructOrder(data: any): Order {
+    const order = new Order(
+      new OrderId(data.id),
+      new CustomerId(data.customerId)
+    );
+
+    // Reconstruct state from persistence data
+    // This would need to be implemented based on your persistence strategy
+
+    return order;
+  }
+}
+```
+
+## Best Practices
+
+### 1. Aggregate Design
+- Keep aggregates small and focused
+- Define clear boundaries
+- Maintain consistency within aggregates
+- Use eventual consistency between aggregates
+
+### 2. Value Objects
+- Make them immutable
+- Implement proper equality
+- Include validation logic
+- Use them for primitive obsession
+
+### 3. Entities
+- Use meaningful IDs
+- Implement proper equality
+- Track version for concurrency
+- Keep business logic in entities
+
+### 4. Repositories
+- Use interfaces for abstraction
+- Implement proper error handling
+- Use transactions for consistency
+- Handle domain events properly
+
+### 5. Domain Services
+- Keep them stateless
+- Focus on domain logic
+- Use them sparingly
+- Make them testable
+
+### 6. Domain Events
+- Make them immutable
+- Include all necessary data
+- Use proper naming conventions
+- Handle them asynchronously
+
+## Testing Patterns
+
+### Unit Testing Aggregates
+```typescript
+// ✅ Good: Aggregate Unit Test
+describe('Order Aggregate', () => {
+  let order: Order;
+  let customerId: CustomerId;
+
+  beforeEach(() => {
+    customerId = new CustomerId('customer-123');
+    order = OrderFactory.createOrder(customerId);
+  });
+
+  describe('addItem', () => {
+    it('should add item to draft order', () => {
+      const productId = new ProductId('product-456');
+      const unitPrice = new Money(10.00, 'USD');
+
+      order.addItem(productId, 2, unitPrice);
+
+      expect(order.items).toHaveLength(1);
+      expect(order.total.amount).toBe(20.00);
+      expect(order.domainEvents).toHaveLength(1);
+      expect(order.domainEvents[0]).toBeInstanceOf(OrderItemAddedEvent);
+    });
+
+    it('should not add item to confirmed order', () => {
+      order.confirm();
+      const productId = new ProductId('product-456');
+      const unitPrice = new Money(10.00, 'USD');
+
+      expect(() => {
+        order.addItem(productId, 2, unitPrice);
+      }).toThrow('Cannot add items to non-draft order');
+    });
+  });
+});
+```
+
+### Integration Testing
+```typescript
+// ✅ Good: Repository Integration Test
+describe('OrderRepository', () => {
+  let repository: OrderRepository;
+  let db: Database;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    repository = new OrderRepository(db, new InMemoryEventStore());
+  });
+
+  it('should save and retrieve order', async () => {
+    const order = OrderFactory.createOrder(new CustomerId('customer-123'));
+    order.addItem(new ProductId('product-456'), 2, new Money(10.00, 'USD'));
+
+    await repository.saveWithEvents(order);
+
+    const retrieved = await repository.findById(order.id);
+    expect(retrieved).toBeDefined();
+    expect(retrieved.id.equals(order.id)).toBe(true);
+  });
+});
+```
+
+## Performance Considerations
+
+### 1. Lazy Loading
+```typescript
+// ✅ Good: Lazy Loading Pattern
+class OrderWithLazyItems implements OrderAggregate {
+  private _items: OrderItem[] | null = null;
+
+  async getItems(): Promise<OrderItem[]> {
+    if (this._items === null) {
+      this._items = await this.loadItems();
+    }
+    return [...this._items];
+  }
+
+  private async loadItems(): Promise<OrderItem[]> {
+    // Load from repository
+    return [];
+  }
+}
+```
+
+### 2. Caching
+```typescript
+// ✅ Good: Repository with Caching
+class CachedOrderRepository implements AggregateRepository<Order, OrderId> {
+  constructor(
+    private readonly repository: OrderRepository,
+    private readonly cache: Cache
+  ) {}
+
+  async findById(id: OrderId): Promise<Order | null> {
+    const cacheKey = `order:${id.value}`;
+    let order = await this.cache.get(cacheKey);
+
+    if (!order) {
+      order = await this.repository.findById(id);
+      if (order) {
+        await this.cache.set(cacheKey, order, 300); // 5 minutes
+      }
+    }
+
+    return order;
+  }
+}
+```
+
+## Security Considerations
+
+### 1. Input Validation
+```typescript
+// ✅ Good: Input Validation in Value Objects
+class Email extends ValueObject<string> {
+  protected validate(): void {
+    if (!this._value || this._value.trim().length === 0) {
+      throw new Error('Email cannot be empty');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this._value)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Prevent injection attacks
+    if (this._value.includes('<script>') || this._value.includes('javascript:')) {
+      throw new Error('Invalid email content');
+    }
+  }
+}
+```
+
+### 2. Authorization
+```typescript
+// ✅ Good: Authorization in Domain Service
+class OrderAuthorizationService implements DomainService {
+  async canModifyOrder(userId: UserId, orderId: OrderId): Promise<boolean> {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) {
+      return false;
+    }
+
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      return false;
+    }
+
+    // Business rule: Only order owner or admin can modify
+    return order.customerId.equals(user.customerId) || user.isAdmin();
+  }
+}
+```
+
+## Edge Cases and Considerations
+
+### 1. Large Aggregates
+- Split into multiple aggregates
+- Use lazy loading for collections
+- Implement pagination
+- Use eventual consistency
+
+### 2. Cross-Aggregate Consistency
+- Use domain events
+- Implement saga pattern
+- Use eventual consistency
+- Handle failures gracefully
+
+### 3. Concurrency Control
+- Use optimistic locking
+- Implement version tracking
+- Handle conflicts appropriately
+- Use proper transaction boundaries
+
+### 4. Event Sourcing
+- Consider for complex domains
+- Implement proper event versioning
+- Handle schema evolution
+- Use snapshots for performance

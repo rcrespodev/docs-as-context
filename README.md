@@ -18,8 +18,6 @@ The framework is designed to be used with Cursor, but can be used with other too
 - Temporary File Handling: Manages ephemeral files (e.g., logs, test configs) that are automatically created and deleted to keep the repository clean.
 - Knowledge Base Management: knowledge-base.mdc maintains a repository of technical documentation, best practices, and code examples accessible to AI agents.
 - Tech stack: Maintenaibles rules for each technology stack. e.g. mern-stack.mdc, react.mdc, nestjs.mdc, llm.mdc, mcp-agent.mdc, etc.
-- Project Status Management: project-status.mdc maintains a repository of project status, progress, roadmap, backlog, sprint, sprint backlog, and sprint progress.
-- Project Management: project-management.mdc maintains a repository of project management, status, progress, roadmap, backlog, sprint, sprint backlog, and sprint progress.
 - Integration with github: git-commit-writer.mdc, git-issue-writer.mdc, pull-request-writer.mdc, etc.
 
 ## Base Template Structure
@@ -28,6 +26,8 @@ The framework is designed to be used with Cursor, but can be used with other too
 root/
 ├── .cursor/rules/                  # All rule files
 │   ├── core/               # Core rules
+│   │   ├── application-flow-documentation.mdc              # Template for writing application flow
+│   │   ├── prd-documentation.mdc      # Template for writing Product Requirements Document
 │   │   ├── task-manager.mdc             # Task manager rules
 │   │   ├── testing.mdc                  # Testing rules
 │   │   ├── code-quality.mdc            # Standards for writing quality code
@@ -40,17 +40,10 @@ root/
 │   │   ├── code-linting-guidelines.mdc # Guidelines for following project linting standards
 │   │   ├── documentation-guidelines.mdc # Guidelines for writing project documentation
 │   │   ├── project-structure.mdc       # Rules for following project structure
-│   │   ├── locale-configuration.mdc    # Rules for writing documentation and code comments in project languages
-│   │   ├── development.mdc             # Guidelines for getting started with the project
-│   │   ├── knowledge-base.mdc          # Knowledge base for project functionality
-│   │   └── project-management.mdc      # Rules for managing project documentation
+│   │   └── knowledge-base.mdc          # Knowledge base for project functionality
 │   ├── domain/             # Domain-driven design rules
-│   │   ├── user-stories-guidelines.mdc         # Guidelines for writing user stories
-│   │   ├── domain-events-guidelines.mdc        # Guidelines for domain events
-│   │   ├── domain-services-guidelines.mdc      # Guidelines for domain services
-│   │   ├── domain-repositories-guidelines.mdc  # Guidelines for domain repositories
-│   │   ├── domain-value-objects-guidelines.mdc # Guidelines for domain value objects
-│   │   └── domain-entities-guidelines.mdc      # Guidelines for domain entities
+│   │   ├── user-stories.mdc         # Template for writing user stories
+│   │   └── domain-driven-design.mdc        # Guidelines for writte code following domain driven design
 │   ├── devops/             # DevOps rules
 │   │   ├── ci-cd.mdc                   # CI/CD configuration guidelines
 │   │   ├── monitoring.mdc              # Monitoring configuration guidelines
@@ -60,7 +53,7 @@ root/
 │       ├── react-guidelines.mdc        # React configuration guidelines
 │       ├── nestjs-guidelines.mdc       # NestJS configuration guidelines
 │       ├── api-testing-guidelines.mdc  # API testing configuration guidelines
-│       ├── llm-guidelines.mdc          # LLM configuration guidelines
+│       ├── llm-guidelines.mdc          # LLM configuration guidelines  
 │       ├── prisma-guidelines.mdc       # Prisma configuration guidelines
 │       ├── mcp-agent-guidelines.mdc    # MCP agent configuration guidelines
 │       ├── nextjs-guidelines.mdc       # NextJS configuration guidelines
@@ -93,14 +86,6 @@ root/
 │   │   │   └── refactor-feature-task.md # Code refactoring task
 │   │   └── chore/                      # Chore tasks
 │   │       └── chore-feature-task.md   # Maintenance task
-│   ├── project-status/     # Project status documentation
-│   │   ├── project-progress.md         # Project progress tracking
-│   │   ├── project-status.md           # Current project status
-│   │   ├── project-roadmap.md          # Project roadmap
-│   │   ├── project-backlog.md          # Project backlog
-│   │   ├── project-sprint.md           # Sprint planning
-│   │   ├── project-sprint-backlog.md   # Sprint backlog
-│   │   └── project-sprint-progress.md  # Sprint progress tracking
 │   └── domain/             # Domain documentation
 │       ├── prd.md                      # Product requirements document
 │       ├── application-flow.md         # Application flow documentation
@@ -137,6 +122,8 @@ The rules directory contains all the guidelines and standards that AI agents fol
 
 #### Core Rules (`/.cursor/rules/core`)
 Essential guidelines that apply across all aspects of development:
+- **application-flow-documentation.mdc**: Template for writing application flow documentation
+- **prd-documentation.mdc**: Template for writing Product Requirements Document
 - **task-manager.mdc**: Defines how to create, structure, update and delete tasks in the docs/tasks/ directory
 - **testing.mdc**: Standards for writing high-quality, maintainable tests. Apply to all tests. Is agnostic of the technology stack.
 - **code-quality.mdc**: Standards for writing high-quality, maintainable code. Apply to all code. Is agnostic of the technology stack.
@@ -149,19 +136,12 @@ Essential guidelines that apply across all aspects of development:
 - **code-linting-guidelines.mdc**: Project-specific linting rules and standards.
 - **documentation-guidelines.mdc**: Standards for writing project documentation
 - **project-structure.mdc**: Rules for maintaining consistent project structure
-- **locale-configuration.mdc**: Guidelines for internationalization and localization
-- **development.mdc**: Getting started guide for new developers
 - **knowledge-base.mdc**: Centralized knowledge repository for project functionality
-- **project-management.mdc**: Guidelines for project management and status tracking
 
 #### Domain Rules (`/.cursor/rules/domain`)
 Domain-Driven Design (DDD) specific guidelines:
-- **user-stories-guidelines.mdc**: Standards for writing user stories
-- **domain-events-guidelines.mdc**: Guidelines for domain event design and implementation
-- **domain-services-guidelines.mdc**: Standards for domain service development
-- **domain-repositories-guidelines.mdc**: Guidelines for repository pattern implementation
-- **domain-value-objects-guidelines.mdc**: Standards for value object design
-- **domain-entities-guidelines.mdc**: Guidelines for entity design and management
+- **user-stories.mdc**: Standards for writing user stories
+- **domain-driven-design.mdc**: Guidelines for writte code following domain driven design
 
 #### DevOps Rules (`/.cursor/rules/devops`)
 Infrastructure and deployment guidelines:
@@ -206,16 +186,6 @@ Organized task documentation by type:
 - **refactor/**: Code refactoring and improvement tasks
 - **chore/**: Maintenance and housekeeping tasks
 
-#### Project Status (`/docs/project-status`)
-Project management and tracking documentation:
-- **project-progress.md**: Overall project progress tracking
-- **project-status.md**: Current project status and health
-- **project-roadmap.md**: Long-term project roadmap
-- **project-backlog.md**: Product backlog management
-- **project-sprint.md**: Sprint planning and management
-- **project-sprint-backlog.md**: Sprint-specific backlog items
-- **project-sprint-progress.md**: Sprint progress tracking
-
 #### Domain Documentation (`/docs/domain`)
 Business domain and requirements documentation:
 - **prd.md**: Product Requirements Document
@@ -231,18 +201,17 @@ Contains temporary files that are automatically generated and cleaned up. This d
 Clone the Repository:git clone https://github.com/<your-org>/docs-as-context.git
 cd docs-as-context
 
-
 ### Set Up Your AI Tool:
 Configure Cursor or your preferred AI-assisted programming tool.
 Load the rules/ directory into the tool to enable rule-based automation.
 
+
 ## Configure the Rules:
 
-- [ ] Configure the locale configuration in the rules/core/locale-configuration.mdc file.
+- [ ] Write the application flow documentation in the docs/domain/application-flow.md using the application-flow-documentation.mdc rule.
+- [ ] Write the prd documentation in the docs/domain/prd.md using the prd-documentation.mdc rule.
 - [ ] Configure the project structure in the rules/core/project-structure.mdc file.
-- [ ] Configure the development guidelines in the rules/core/development.mdc file.
 - [ ] Configure the knowledge base in the rules/core/knowledge-base.mdc file.
-- [ ] Configure the project management guidelines in the rules/core/project-management.mdc file.
 - [ ] Configure the code quality rules in the rules/core/code-quality.mdc file.
 - [ ] Configure the code security rules in the rules/core/code-security.mdc file.
 - [ ] Configure the code review rules in the rules/core/code-review.mdc file.
@@ -252,6 +221,77 @@ Load the rules/ directory into the tool to enable rule-based automation.
 - [ ] Configure the task manager rules in the rules/core/task-manager.mdc file accordion to project stacks.
 - [ ] Configure the domain rules in the rules/domain/ directory.
 - [ ] Configure the devops rules in the rules/devops/ directory.
+- [ ] Configure the user stories in the docs/domain/user-stories/ directory.
+- [ ] Configure the domain driven design rules in the rules/domain/domain-driven-design.mdc file.
+- [ ] Configure the specific rules for the project stack in the rules/stacks/ directory.
+
+### Define Tasks:
+Create task files in the docs/tasks directory with metadata (e.g., type: feature, context: api). Atach the task to the appropriate folder (e.g. feature, bug, deploy, refactor, chore). The rules task-manager.mdc will apply the appropriate rules to the task.
+Example:
+```
+# Task: Implement Login Endpoint
+- type: feature
+- context: api
+- description: Add endpoint for user authentication
+```
+
+#### Task Types:
+- feature: A new feature or enhancement.
+- bug: A bug fix.
+- deploy: A deployment or release.
+- refactor: A code refactoring.
+- chore: A maintenance task.
+
+#### Task Context:
+- api: A API-related task. -> atach rules like .rules/stacks/api-development.mdc
+- mobile: A mobile-related task. -> atach rules like .rules/stacks/mobile-development.mdc
+- web: A web-related task. -> atach rules like .rules/stacks/web-development.mdc
+- desktop: A desktop-related task. -> atach rules like .rules/stacks/desktop-development.mdc
+- ai: A AI-related task. -> atach rules like .rules/stacks/ai-development.mdc
+- mcp: A MCP-related task. -> atach rules like .rules/stacks/mcp-development.mdc
+- fullstack: A fullstack-related task. -> atach multiple rules.
+SEE how to atach auto rules in .cursor/rules/core/task-manager.mdc for more details in `Rule Selection Algorithm`.
+
+#### Task Hierarchy:
+- major task: A major task that requires multiple sub-tasks.
+- sub-task: A sub-task of a major task.
+- temporary task: A temporary task that is not part of the major task. No need to be committed.
+
+### Autodocumentation:
+Each task generate and maintain your own documentation in the docs/tasks/ directory.
+- task-name: A name of the task. (e.g. task-feature-login.md)
+- description: A description of the task.
+- context: A context of the task.
+- type: A type of the task.
+- area: A area of the task.
+- sub-task: A sub-task of the task.
+- temporary task: A temporary task of the task.
+- major task: A major task of the task.
+- completed steps: A list of completed steps of the task.
+- pending steps: A list of pending steps of the task.
+- blocked steps: A list of blocked steps of the task.
+- notes: A list of notes of the task.
+- questions: A list of questions of the task.
+- answers: A list of answers of the task.
+- references: A list of references of the task.
+- results: Documentation of the implemented code.
+
+### Run task-manager.mdc:
+The global rule will analyze task metadata and apply relevant rules (e.g., backend-feature.mdc, testing doubts).
+
+#### Task Manager Functionality:
+- **Standard Task Format**: Each task is described in a predefined format with fields like type, area, and description.
+- **Automatic Analysis**: task-manager.mdc reads task metadata and selects relevant rules based on predefined criteria.
+- **Rule Application**: Selected rules are automatically applied to the development context.
+
+Example:
+```
+# Task: Fix UI Button Bug
+- type: bug
+- area: frontend
+- description: Submit button not responding
+```
+Applied Rules: frontend-bug.mdc, testing.mdc, edge-cases.mdc, documentation.mdc, performance.mdc, accessibility.mdc, internationalization.mdc
 
 ### Configure Glob Patterns:
 Glob patterns determine which files each rule applies to. Configure them based on your project structure:
@@ -324,92 +364,25 @@ project/
 #### Configuration Best Practices:
 
 1. **Be Specific**: Use targeted patterns rather than broad ones
-   ```yaml
-   # ✅ Good: Specific to API
-   globs: apps/api/**/*.ts
-   
-   # ❌ Avoid: Too broad
-   globs: **/*
-   ```
+```yaml
+# ✅ Good: Specific to API
+globs: apps/api/**/*.ts
+
+# ❌ Avoid: Too broad
+globs: **/*
+```
 
 2. **Consider File Types**: Different rules for different file types
-   ```yaml
-   # TypeScript files
-   globs: **/*.ts
-   
-   # React components
-   globs: **/*.tsx
-   
-   # Configuration files
-   globs: **/*.config.{js,ts}
-   ```
+```yaml
+# TypeScript files
+globs: **/*.ts
 
-### Define Tasks:
-Create task files in the docs/tasks directory with metadata (e.g., type: feature, context: api). Atach the task to the appropriate folder (e.g. feature, bug, deploy, refactor, chore). The rules task-manager.mdc will apply the appropriate rules to the task.
-Example:
+# React components
+globs: **/*.tsx
+
+# Configuration files
+globs: **/*.config.{js,ts}
 ```
-# Task: Implement Login Endpoint
-- type: feature
-- context: api
-- description: Add endpoint for user authentication
-```
-
-#### Task Types:
-- feature: A new feature or enhancement.
-- bug: A bug fix.
-- deploy: A deployment or release.
-- refactor: A code refactoring.
-- chore: A maintenance task.
-
-#### Task Context:
-- api: A API-related task. -> atach rules like .rules/stacks/api-development.mdc
-- mobile: A mobile-related task. -> atach rules like .rules/stacks/mobile-development.mdc
-- web: A web-related task. -> atach rules like .rules/stacks/web-development.mdc
-- desktop: A desktop-related task. -> atach rules like .rules/stacks/desktop-development.mdc
-- ai: A AI-related task. -> atach rules like .rules/stacks/ai-development.mdc
-- mcp: A MCP-related task. -> atach rules like .rules/stacks/mcp-development.mdc
-- fullstack: A fullstack-related task. -> atach multiple rules.
-
-#### Task Hierarchy:
-- major task: A major task that requires multiple sub-tasks.
-- sub-task: A sub-task of a major task.
-- temporary task: A temporary task that is not part of the major task. No need to be committed.
-
-### Autodocumentation:
-Each task generate and maintain your own documentation in the docs/tasks/ directory.
-- task-name: A name of the task. (e.g. task-feature-login.md)
-- description: A description of the task.
-- context: A context of the task.
-- type: A type of the task.
-- area: A area of the task.
-- sub-task: A sub-task of the task.
-- temporary task: A temporary task of the task.
-- major task: A major task of the task.
-- completed steps: A list of completed steps of the task.
-- pending steps: A list of pending steps of the task.
-- blocked steps: A list of blocked steps of the task.
-- notes: A list of notes of the task.
-- questions: A list of questions of the task.
-- answers: A list of answers of the task.
-- references: A list of references of the task.
-- results: Documentation of the implemented code.
-
-### Run task-manager.mdc:
-The global rule will analyze task metadata and apply relevant rules (e.g., backend-feature.mdc, testing doubts).
-
-#### Task Manager Functionality:
-- **Standard Task Format**: Each task is described in a predefined format with fields like type, area, and description.
-- **Automatic Analysis**: task-manager.mdc reads task metadata and selects relevant rules based on predefined criteria.
-- **Rule Application**: Selected rules are automatically applied to the development context.
-
-Example:
-```
-# Task: Fix UI Button Bug
-- type: bug
-- area: frontend
-- description: Submit button not responding
-```
-Applied Rules: frontend-bug.mdc, testing.mdc, edge-cases.mdc, documentation.mdc, performance.mdc, accessibility.mdc, internationalization.mdc
 
 ### Contribute Rules:
 Add new rules to the appropriate subdirectory (e.g., rules/stacks/ for React-specific rules).

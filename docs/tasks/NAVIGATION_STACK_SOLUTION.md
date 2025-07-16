@@ -27,7 +27,7 @@
 
 ## Resumen del Problema
 
-Durante el desarrollo de la aplicación MedTrack, identificamos un problema crítico con la navegación entre rutas anidadas en Expo Router. Los botones de retroceso no funcionaban correctamente cuando se navegaba entre diferentes secciones de la aplicación (tasks → treatments, tasks → health-records, etc.).
+Durante el desarrollo de la aplicación, identificamos un problema crítico con la navegación entre rutas anidadas en Expo Router. Los botones de retroceso no funcionaban correctamente cuando se navegaba entre diferentes secciones de la aplicación (tasks → treatments, tasks → health-records, etc.).
 
 ### Síntomas del Problema
 

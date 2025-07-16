@@ -1,0 +1,267 @@
+---
+description: Template for writing application flow documentation
+globs: docs/application-flow.md
+alwaysApply: false
+---
+
+# Application Flow Documentation Template
+
+## Overview
+This rule provides a comprehensive template for creating application flow documentation in markdown format. It ensures consistent structure, clear flow descriptions, and proper handling of exceptions and edge cases.
+
+## Instructions for AI Agent
+1. Create application flow documentation in a markdown file (in `docs/application-flow.md` or `docs/domain/application-flow.md`)
+2. Use this template to document user flows for the application
+3. Include detailed step-by-step descriptions for each flow
+4. Document all exceptions and edge cases
+5. Use clear, user-focused language
+6. Include visual diagrams when possible (Lucidchart, Draw.io, or text-based diagrams)
+7. If documentation is not written in the same language as the code, translate it to the code language
+
+## Template Structure
+
+### Document Header
+```markdown
+# Application Flow Document
+
+- Application Name: [Insert Application Name]
+- Date: [Insert Date]
+- Version: [Insert Version Number]
+
+## Purpose
+This document describes the main flows of the [Application Name] application. It serves as a guide for developers, designers, and stakeholders to understand how users will interact with the application to achieve specific objectives.
+
+## Scope
+This document covers the following parts of the application:
+
+[List specific features, modules, or areas covered]
+
+## User Roles
+The application supports the following user roles:
+
+Role 1: [Description of the role and its permissions]
+Role 2: [Description of the role and its permissions]
+[Add more roles as needed]
+```
+
+### Flow Diagrams Section
+```markdown
+## Flow Diagrams
+Below are the main flows of the application. Each flow is represented by a diagram or step-by-step description.
+
+### Flow 1: [Flow Name]
+
+**Diagram**: [Insert diagram or link to diagram]
+**Description**: [Brief summary of what this flow accomplishes]
+
+### Flow 2: [Flow Name]
+
+**Diagram**: [Insert diagram or link to diagram]
+**Description**: [Brief summary of what this flow accomplishes]
+
+[Add more flows as needed]
+```
+
+### Flow Descriptions Section
+```markdown
+## Flow Descriptions
+Each flow is described in detail below, including steps, decisions, and outcomes.
+
+### Flow 1: [Flow Name]
+
+**Purpose**: [What is the objective of this flow?]
+
+**Steps**:
+1. [Description of step 1]
+2. [Description of step 2]
+3. [Decision point: condition and outcomes]
+4. [Description of step 3]
+5. [End of flow: outcome]
+
+**Expected Result**: [What should happen if the flow completes successfully]
+
+### Flow 2: [Flow Name]
+
+**Purpose**: [What is the objective of this flow?]
+
+**Steps**:
+1. [Description of step 1]
+2. [Description of step 2]
+3. [Description of step 3]
+4. [End of flow: outcome]
+
+**Expected Result**: [What should happen if the flow completes successfully]
+
+[Add more flows as needed]
+```
+
+### Exceptions and Edge Cases Section
+```markdown
+## Exceptions and Edge Cases
+This section covers scenarios where flows might deviate from the expected path.
+
+### Flow 1: [Flow Name]
+
+**Exception 1**: [Description of the exception]
+**Handling**: [How the application should handle this exception]
+
+**Edge Case 1**: [Description of the edge case]
+**Handling**: [How the application should handle this edge case]
+
+### Flow 2: [Flow Name]
+
+**Exception 1**: [Description of the exception]
+**Handling**: [How the application should handle this exception]
+
+[Add more exceptions and edge cases as needed]
+```
+
+### Dependencies and Assumptions Section
+```markdown
+## Dependencies
+The flows described in this document depend on the following:
+
+[Dependency 1, e.g., external API]
+[Dependency 2, e.g., database availability]
+[Dependency 3, e.g., third-party service]
+
+## Assumptions
+The following assumptions were made during the creation of this document:
+
+[Assumption 1, e.g., users have stable internet connection]
+[Assumption 2, e.g., data is available in real-time]
+[Assumption 3, e.g., users are familiar with the application interface]
+```
+
+### Revision History Section
+```markdown
+## Revision History
+
+| Version | Date | Author | Description |
+|---------|------|--------|-------------|
+| 1.0 | [Date] | [Author Name] | Initial draft |
+| 1.1 | [Date] | [Author Name] | Updated flow diagrams |
+
+[Add more revisions as needed]
+```
+
+### Usage Instructions Section
+```markdown
+## How to Use This Template
+
+- Replace the placeholders (e.g., [Insert Application Name], [Flow Name]) with application-specific information.
+- Add or remove sections based on the complexity of your application and the number of flows.
+- Use the "Flow Diagrams" section to include visual representations of the flows. You can use tools like Lucidchart, Draw.io, or even text-based diagrams.
+- In the "Flow Descriptions" section, provide detailed steps for each flow, including any decision points and expected outcomes.
+- Consider all possible exceptions and edge cases to ensure the application handles unexpected scenarios appropriately.
+- Update the "Revision History" section as the document evolves to keep track of changes.
+
+This template is designed to be flexible and adaptable to various types of applications, providing a clear structure for documenting application flows.
+```
+
+## Best Practices
+
+### 1. Flow Documentation
+- **User-Centric**: Focus on user actions and experiences
+- **Step-by-Step**: Provide clear, sequential steps
+- **Decision Points**: Clearly mark where users make choices
+- **Outcomes**: Describe what happens after each step
+- **Visual Aids**: Include diagrams when possible
+
+### 2. Exception Handling
+- **Comprehensive**: Cover all possible failure scenarios
+- **User-Friendly**: Provide clear error messages and recovery options
+- **Robust**: Handle edge cases gracefully
+- **Secure**: Consider security implications
+
+### 3. Diagram Creation
+- **Clear**: Use simple, understandable symbols
+- **Consistent**: Use the same notation throughout
+- **Accessible**: Provide text descriptions for diagrams
+- **Maintainable**: Keep diagrams up to date
+
+## Examples
+
+### Good Flow Description
+```markdown
+### Flow 1: User Registration
+
+**Purpose**: Allow new users to create an account in the system
+
+**Steps**:
+1. User navigates to the registration page
+2. User fills out the registration form with email, password, and name
+3. User clicks the "Register" button
+4. System validates the input data
+5. If validation passes, system creates the user account
+6. System sends confirmation email to the user
+7. User is redirected to the login page with success message
+
+**Expected Result**: User account is created and user can log in with their credentials
+```
+
+### Good Exception Handling
+```markdown
+**Exception 1**: User enters invalid email format
+**Handling**: Display error message "Please enter a valid email address" and allow user to correct the input
+
+**Exception 2**: Email is already registered
+**Handling**: Display error message "This email is already registered. Please use a different email or try logging in"
+
+**Exception 3**: Network connection fails during registration
+**Handling**: Display error message "Registration failed. Please check your internet connection and try again"
+```
+
+## Security Considerations
+
+### 1. Input Validation
+- Validate all user inputs
+- Prevent injection attacks
+- Sanitize data before processing
+- Implement proper error handling
+
+### 2. Authentication Flows
+- Secure password requirements
+- Implement proper session management
+- Handle failed login attempts
+- Protect against brute force attacks
+
+### 3. Data Protection
+- Encrypt sensitive data
+- Implement proper access controls
+- Handle user data according to privacy regulations
+- Secure API endpoints
+
+## Performance Considerations
+
+### 1. Response Time
+- Define acceptable response times
+- Implement loading indicators
+- Optimize database queries
+- Use caching where appropriate
+
+### 2. User Experience
+- Minimize steps in critical flows
+- Provide clear feedback at each step
+- Handle slow network connections
+- Implement progressive disclosure
+
+## Testing Strategy
+
+### 1. Flow Testing
+- Test complete user journeys
+- Verify all decision points
+- Test exception scenarios
+- Validate user feedback
+
+### 2. Integration Testing
+- Test flow interactions
+- Verify API endpoints
+- Test database operations
+- Validate external dependencies
+
+### 3. User Acceptance Testing
+- Test with real users
+- Validate business requirements
+- Gather feedback and iterate
+- Test accessibility requirements

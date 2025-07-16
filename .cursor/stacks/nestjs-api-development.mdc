@@ -1,0 +1,592 @@
+---
+description: NestJS API development patterns and guidelines
+globs: apps/api/**/*
+alwaysApply: false
+---
+# API Development Guidelines (NestJS)
+
+## Module Architecture
+
+### Typical Module Structure
+
+```
+apps/api/src/modules/[module-name]/
+├── [module-name].controller.ts      # Main controller
+├── [module-name].controller.spec.ts # Controller tests
+├── [module-name].service.ts         # Business service
+├── [module-name].module.ts          # Module definition
+└── [module-name].entity.ts          # Entity (optional)
+```
+
+### Module Pattern
+
+```typescript
+// [module-name].module.ts
+import { Module } from '@nestjs/common';
+import { [ModuleName]Controller } from './[module-name].controller';
+import { [ModuleName]Service } from './[module-name].service';
+import { [DependencyModule] } from '../[dependency]/[dependency].module';
+
+@Module({
+  imports: [[DependencyModule]], // Dependent modules
+  providers: [[ModuleName]Service],
+  controllers: [[ModuleName]Controller],
+  exports: [[ModuleName]Service], // If other modules need it
+})
+export class [ModuleName]Module {}
+```
+
+## Controllers
+
+### Controller Pattern
+
+```typescript
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
+import { [ModuleName]Service } from './[module-name].service';
+import { RequestBody } from '../auth/decorators/body.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+
+@Controller('[endpoint-name]')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.PATIENT) // Or appropriate role
+export class [ModuleName]Controller {
+  constructor(private readonly [moduleName]Service: [ModuleName]Service) {}
+
+  @Post()
+  async create[Entity](
+    @CurrentUser() user: ExtendedUserModel,
+    @RequestBody((data) => create[Entity]Schema.safeParse(data))
+    body: Create[Entity]RequestBody,
+  ) {
+    return await this.[moduleName]Service.create[Entity]({
+      user,
+      body,
+    });
+  }
+
+  @Get('list')
+  async list[Entity](
+    @CurrentUser() user: ExtendedUserModel,
+    @RequestQuery((data) => list[Entity]RequestQuerySchema.safeParse(data))
+    query: List[Entity]RequestQuery,
+  ) {
+    return await this.[moduleName]Service.list[Entity]({
+      user,
+      query,
+    });
+  }
+}
+```
+
+### Custom Decorators
+
+#### RequestBody
+```typescript
+// For body validation with Zod
+@RequestBody((data) => createUserMedicationSchema.safeParse(data))
+body: CreateUserMedicationRequestBody
+```
+
+#### RequestQuery
+```typescript
+// For query parameters validation
+@RequestQuery((data) => listUserMedicationRequestQuerySchema.safeParse(data))
+query: ListUserMedicationRequestQuery
+```
+
+#### RequestParams
+```typescript
+// For path parameters validation
+@RequestParams((data) => createUserMedicationDoseRequestParamsSchema.safeParse(data))
+params: CreateUserMedicationDoseRequestParams
+```
+
+#### CurrentUser
+```typescript
+// To get the authenticated user
+@CurrentUser() user: ExtendedUserModel
+```
+
+## Services
+
+### Service Pattern
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { DatabaseService } from '../database/database.service';
+import { ApiError, ApiResponse, ExtendedUserModel } from '@project/bff';
+import { apiSuccess } from 'src/common/api-success';
+import { EventBusService } from '../event/event-bus.service';
+
+@Injectable()
+export class [ModuleName]Service {
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly eventBusService: EventBusService,
+  ) {}
+
+  async create[Entity]({
+    user,
+    body,
+  }: {
+    user: ExtendedUserModel;
+    body: Create[Entity]RequestBody;
+  }): Promise<ApiResponse<SuccessSchema>> {
+    // 1. Validate input data
+    const existingEntity = await this.db.[entity].findFirst({
+      where: {
+        userId: user.id,
+        // specific conditions
+      },
+    });
+
+    if (existingEntity) {
+      throw new ApiError({
+        code: '[entity]_already_exists',
+        message: 'Entity already exists',
+        statusCode: 400,
+        errors: [],
+      });
+    }
+
+    // 2. Create entity in transaction
+    await this.db.$transaction(async (tx) => {
+      const entity = await tx.[entity].create({
+        data: {
+          // entity data
+          user: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+
+      // 3. Publish event
+      await this.eventBusService.publishEvent({
+        createdById: user.id,
+        entityId: entity.id,
+        entityUuid: entity.uuid,
+        event: {
+          type: '[ENTITY].ADDED',
+          // event data
+        },
+      });
+    });
+
+    return apiSuccess({});
+  }
+
+  async list[Entity]({
+    user,
+    query,
+  }: {
+    user: ExtendedUserModel;
+    query: List[Entity]RequestQuery;
+  }): Promise<ApiResponse<List[Entity]ResponseBody>> {
+    const entities = await this.db.[entity].findMany({
+      where: {
+        userId: user.id,
+        ...(query.search && {
+          // search conditions
+        }),
+      },
+      include: {
+        // necessary relations
+      },
+    });
+
+    return apiSuccess({
+      data: {
+        data: entities,
+        total: entities.length,
+        page: 1,
+        limit: entities.length,
+      },
+    });
+  }
+}
+```
+
+## Error Handling
+
+### ApiError Pattern
+
+```typescript
+throw new ApiError({
+  code: 'specific_error_code',
+  message: 'Descriptive error message',
+  statusCode: 400, // 400, 401, 403, 404, 500
+  errors: [], // Specific validation errors
+});
+```
+
+### Common Error Codes
+
+- `unauthorized`: Invalid or expired token (401)
+- `forbidden`: No permissions (403)
+- `validation_error`: Validation errors (400)
+- `[entity]_not_found`: Entity not found (404)
+- `[entity]_already_exists`: Entity already exists (400)
+
+## Testing
+
+### Test Structure
+
+```typescript
+import { AppModule } from '../../app.module';
+import { createTestSuiteWithAuth } from '../test/test.helper';
+import * as request from 'supertest';
+import { Role } from '@prisma/client';
+import { userFactory } from '../test/model.factory';
+
+describe('[ModuleName]Controller', () => {
+  const testHelper = createTestSuiteWithAuth([AppModule]);
+
+  describe('create[Entity]', () => {
+    test('should reject when user is not authenticated', async () => {
+      const app = testHelper.getApp();
+      const response = await request(app.getHttpServer())
+        .post('/[endpoint]')
+        .send({});
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        code: 'unauthorized',
+        errors: [],
+        message: 'Invalid or expired token',
+        statusCode: 401,
+        path: '/[endpoint]',
+        timestamp: expect.any(String),
+      });
+    });
+
+    test('should reject when user is not authorized', async () => {
+      const app = testHelper.getApp();
+      const jwtService = testHelper.getJwtService();
+      const databaseService = testHelper.getDatabaseService();
+
+      const { generateToken } = await userFactory({
+        override: { role: Role.DOCTOR }, // Incorrect role
+        jwtService,
+        databaseService,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post('/[endpoint]')
+        .set('Authorization', `Bearer ${generateToken()}`)
+        .send({});
+
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({
+        code: 'forbidden',
+        errors: [],
+        message: 'No permissions to access this resource',
+        statusCode: 403,
+        path: '/[endpoint]',
+        timestamp: expect.any(String),
+      });
+    });
+
+    test('should reject when body is not valid', async () => {
+      const app = testHelper.getApp();
+      const jwtService = testHelper.getJwtService();
+      const databaseService = testHelper.getDatabaseService();
+
+      const { generateToken } = await userFactory({
+        override: { role: Role.PATIENT },
+        jwtService,
+        databaseService,
+      });
+
+      const invalidBody = {
+        // Invalid data
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/[endpoint]')
+        .set('Authorization', `Bearer ${generateToken()}`)
+        .send(invalidBody);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        code: 'validation_error',
+        statusCode: 400,
+      });
+    });
+
+    test('should create entity successfully', async () => {
+      const app = testHelper.getApp();
+      const jwtService = testHelper.getJwtService();
+      const databaseService = testHelper.getDatabaseService();
+
+      const { generateToken, user } = await userFactory({
+        override: { role: Role.PATIENT },
+        jwtService,
+        databaseService,
+      });
+
+      // Create dependent entities using factories
+      const { entity } = await entityFactory({
+        databaseService,
+      });
+
+      const validBody = {
+        // Valid data
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/[endpoint]')
+        .set('Authorization', `Bearer ${generateToken()}`)
+        .send(validBody);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        success: true,
+      });
+
+      // Verify in database
+      const createdEntity = await databaseService.[entity].findFirst({
+        where: { userId: user.id },
+        include: { /* relations */ },
+      });
+
+      expect(createdEntity).toBeDefined();
+      expect(createdEntity).toMatchObject({
+        userId: user.id,
+        // other properties
+      });
+
+      // Verify events
+      const events = await databaseService.event.findMany({
+        where: {
+          entityId: createdEntity.id,
+          type: '[ENTITY].ADDED',
+          createdById: user.id,
+        },
+      });
+
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        type: '[ENTITY].ADDED',
+        entityId: createdEntity.id,
+        entityUuid: createdEntity.uuid,
+        payload: {
+          // event data
+        },
+      });
+    });
+  });
+});
+```
+
+### Testing Patterns
+
+#### 1. Authentication and Authorization
+- Always test endpoints without authentication
+- Test with incorrect roles
+- Verify specific error messages
+
+#### 2. Data Validation
+- Test with invalid data
+- Verify specific error codes
+- Validate error response structure
+
+#### 3. Success Cases
+- Create dependent entities with factories
+- Verify successful response
+- Validate data in database
+- Verify published events
+
+#### 4. Query Conditions
+- Create additional entities to verify filters
+- Test that only correct user data is returned
+- Verify pagination and search
+
+## Factories and Mocks
+
+### Using Factories
+
+```typescript
+// Create main entity
+const { user, generateToken } = await userFactory({
+  databaseService,
+  override: { role: Role.PATIENT },
+});
+
+// Create dependent entities
+const { drug } = await drugFactory({ databaseService });
+const { medication } = await medicationFactory({ 
+  databaseService, 
+  drug 
+});
+
+// Create additional entities to verify conditions
+await Promise.all([
+  userFactory({ databaseService, override: { role: Role.DOCTOR } }),
+  userFactory({ databaseService, override: { role: Role.ADMIN } }),
+]);
+```
+
+### Factory Patterns
+
+- Always allow overrides for specific cases
+- Create dependent entities automatically
+- Keep factories reusable
+- Use faker for random data
+
+## Events
+
+### Event Pattern
+
+```typescript
+await this.eventBusService.publishEvent({
+  createdById: user.id,
+  entityId: entity.id,
+  entityUuid: entity.uuid,
+  event: {
+    type: '[ENTITY].[ACTION]',
+    // specific event data
+  } satisfies [Entity][Action]Event,
+});
+```
+
+### Common Event Types
+
+- `[ENTITY].ADDED`: Entity created
+- `[ENTITY].UPDATED`: Entity updated
+- `[ENTITY].DELETED`: Entity deleted
+- `[ENTITY].[SPECIFIC_ACTION]`: Specific action
+
+## Validation with Zod
+
+### Schemas in BFF
+
+```typescript
+// packages/bff/src/schemas/[entity].schema.ts
+export const create[Entity]Schema = z.object({
+  // schema definition
+});
+
+export type Create[Entity]RequestBody = z.infer<typeof create[Entity]Schema>;
+```
+
+### Usage in Controllers
+
+```typescript
+@RequestBody((data) => create[Entity]Schema.safeParse(data))
+body: Create[Entity]RequestBody
+```
+
+## Response Patterns
+
+### Success Response
+
+```typescript
+return apiSuccess({
+  data: {
+    // response data
+  },
+});
+```
+
+### List Response
+
+```typescript
+return apiSuccess({
+  data: {
+    data: entities,
+    total: entities.length,
+    page: 1,
+    limit: entities.length,
+  },
+});
+```
+
+## Useful Commands for AI Agents
+
+### Create New Module
+
+```bash
+# Create module structure
+mkdir -p apps/api/src/modules/new-module
+touch apps/api/src/modules/new-module/new-module.module.ts
+touch apps/api/src/modules/new-module/new-module.controller.ts
+touch apps/api/src/modules/new-module/new-module.controller.spec.ts
+touch apps/api/src/modules/new-module/new-module.service.ts
+
+# Create schema in BFF
+mkdir -p packages/bff/src/schemas
+touch packages/bff/src/schemas/new-module.schema.ts
+```
+
+### Run Tests
+
+## Create .env.testing in apps/api
+
+```bash
+
+DATABASE_URL=postgresql://test_user:test_password@localhost:5433/project_test
+NODE_ENV=testing
+
+```
+
+```bash
+# Start test database
+
+turbo run test:e2e:setup
+
+```
+
+
+```bash
+# Specific test
+cd apps/api && pnpm run test:api -- new-module.controller # filename without extension
+
+# Test with watch
+cd apps/api && pnpm run test:api -- --watch
+
+# Test with coverage
+cd apps/api && pnpm run test:api -- --coverage
+```
+
+### Debugging
+
+```bash
+# View API logs
+pnpm dev:api --verbose
+
+# Verify module structure
+tree apps/api/src/modules -L 2
+```
+
+## Edge Cases and Considerations
+
+### Transactions
+- Use `$transaction` for operations that modify multiple entities
+- Publish events within transactions
+- Handle rollbacks automatically
+
+### Security
+- Always validate the authenticated user
+- Verify permissions by role
+- Sanitize user inputs
+- Use validation decorators
+- Validate that modified or queried resources belong to the authenticated user
+- Validate that modified or queried resources are not deleted (`deletedAt` === null)
+
+### Performance
+- Include only necessary relations in queries
+- Use appropriate database indexes
+- Implement pagination for large lists
+- Cache static data
+
+### Testing
+- Keep tests independent
+- Use factories for test data
+- Verify published events
+- Test edge cases

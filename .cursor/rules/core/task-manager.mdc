@@ -33,6 +33,16 @@ This rule is the central task manager. It automatically analyzes task metadata a
 - **prisma**: Prisma ORM
 - **typescript**: TypeScript development
 
+### Task Hierarchy
+- **major task**: A major task that requires multiple sub-tasks.
+- **sub-task**: A sub-task of a major task.
+- **temporary task**: A temporary task that is not part of the major task. No need to be committed. It is a task that is not part of the main task and is not a standalone task.
+
+### Task Manager Functionality
+- **Standard Task Format**: Each task is described in a predefined format with fields like type, area, and description.
+- **Automatic Analysis**: task-manager.mdc reads task metadata and selects relevant rules based on predefined criteria.
+- **Rule Application**: Selected rules are automatically applied to the development context.
+
 ## Task List Creation
 
 1. Create task lists in a markdown file (in root/docs/tasks/) with the following structure:
@@ -60,7 +70,7 @@ This rule is the central task manager. It automatically analyzes task metadata a
 
 When working with task lists, the AI should:
 
-1. Create task lists in a markdown file (in root/docs/tasks/). Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
+1. Create task lists in a markdown file (in root/docs/tasks/${type}/${context}/${stack}/${description}.md). Use a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
 2. Regularly update the task list file after implementing significant files
 3. Mark completed tasks with [x] when finished
 4. Add new tasks or subtasks or temporary tasks discovered during implementation
