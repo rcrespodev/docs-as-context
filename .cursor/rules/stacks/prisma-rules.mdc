@@ -1,0 +1,191 @@
+---
+description: Prisma models structure and usage guidelines
+globs: packages/database/prisma/schema.prisma
+alwaysApply: false
+---
+# Prisma Database Guidelines
+
+## Estructura General
+
+- We use PostgreSQL as database
+- The schema file is located in: `packages/database/prisma/schema.prisma`
+- All models must follow the established conventions
+
+## Naming Conventions
+
+### Tables (Models)
+- Use singular names for tables
+- Use PascalCase for table names (e.g. `User`, `HealthRecord`, `Medication`)
+
+### Fields
+- Use camelCase for all fields (e.g. `firstName`, `lastName`, `email`, `password`)
+- Identification fields
+  - `id`: Primary key autoincremental (Int)
+  - `uuid`: Unique identifier type UUID (String)
+- Audit fields
+  - `createdAt`: Creation date (DateTime)
+  - `updatedAt`: Update date (DateTime)
+  - `deletedAt`: Deletion date (DateTime, optional for soft delete)
+
+### State fields (Optional according to need)
+- `isActive`: Active state (Boolean)
+- `isDeleted`: Deleted state (Boolean)
+- `isArchived`: Archived state (Boolean)
+- `isVerified`: Verified state (Boolean)
+
+### Versioning fields (Optional according to need)
+- `version`: Version number (Int)
+
+## Relationships
+
+### Relationship Conventions
+- Use `@relation` for explicit relationships
+- Descriptive relationship field names (e.g. `userId`, `healthRecordId`, `medicationId`)
+- Include `onDelete` and `onUpdate` when necessary
+- One-to-One: Use `@unique` in the relationship field (e.g. `userId`, `healthRecordId`, `medicationId`, etc.)
+- One-to-Many: FK field in the "many" table (e.g. `userId`, `healthRecordId`, `medicationId`, etc.)
+- Many-to-Many: Intermediate table with `@@unique([field1, field2])` (e.g. `userId`, `healthRecordId`, `medicationId`, etc.)
+
+## Indexes
+
+### Required Indexes
+- `@@index([id])` in all models
+- `@@index([uuid])` in models with UUID
+- `@@index([deletedAt])` for soft delete
+- `@@index([email])` in models with email
+
+### Performance Indexes
+- Indexes in frequently searched fields
+- Indexes in sorting fields
+- Indexes in relationship fields
+
+## Enums
+
+### Enum Conventions
+- Use SCREAMING_SNAKE_CASE for enum values
+- Descriptive and specific names
+- Group related enums at the end of the schema
+
+### Common Enums
+- `Role`: PATIENT, DOCTOR, ADMIN
+- `Gender`: MALE, FEMALE, OTHER
+- `BloodType`: A_POSITIVE, A_NEGATIVE, etc.
+- `Status`: PENDING, ACTIVE, INACTIVE, etc.
+
+## Soft Delete
+
+### Implementation
+- Use `deletedAt` DateTime optional
+- Automatically filter soft deleted records in queries
+- Maintain referential integrity
+
+### Example of Query
+```prisma
+// Query that excludes soft deleted records
+model User {
+  // ... campos
+  deletedAt DateTime?
+  
+  @@index([deletedAt])
+}
+```
+
+## Migrations
+
+### Conventions
+- Generate migrations with `prisma migrate dev`
+- Review migrations before applying
+- Use descriptive names for migrations
+- Test migrations in development environment
+
+### Example of Root Migration
+```bash
+turbo run db:seed-dev
+```
+
+## Security
+
+### Considerations
+- Never expose sensitive fields in APIs
+- Use hashing for passwords
+- Validate inputs at the application level
+- Implement rate limiting for critical operations
+
+### Sensitive Fields
+- `password`: Always hashed
+- `passwordResetToken`: Temporary and unique
+- `fcmToken`: For push notifications
+- `apiKey`: For service authentication
+
+## Performance
+
+### Optimizations
+- Indexes in frequently searched fields
+- Pagination in large lists
+- Lazy loading of heavy relationships
+- Caching of static data
+
+### Monitoring
+- Monitor slow queries
+- Optimize indexes according to usage
+- Monitor database size
+
+## Implementation Examples
+
+### Typical User Model
+```prisma
+model User {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  email     String   @unique
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  profile        Profile?
+  medicalProfile MedicalProfile?
+  
+  @@index([id])
+  @@index([email])
+  @@index([deletedAt])
+}
+```
+
+### Health Parameter Model
+```prisma
+model HealthParameter {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  name      String
+  unit      String?
+  type      ParameterType
+  insurerId Int
+  insurer   Insurer  @relation(fields: [insurerId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  
+  @@unique([name, insurerId])
+  @@index([id])
+  @@index([deletedAt])
+}
+```
+
+## Useful Commands
+
+### Generate Prisma client
+```bash
+npx prisma generate
+```
+
+### Apply migrations
+```bash
+npx prisma migrate deploy
+```
+
+### Check database state
+```bash
+npx prisma db pull
+```

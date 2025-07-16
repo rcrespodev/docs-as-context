@@ -1,0 +1,471 @@
+---
+description: API Testing best practices and how to run specific test files
+globs: apps/api/**/*.spec.ts
+alwaysApply: false
+---
+
+# API Testing Guidelines
+
+Documentation on how to run tests in the API and best practices for testing.
+
+## Initial Setup
+
+Before running any test, always run the testing database setup:
+
+```bash
+# From the project root
+turbo run test:e2e:setup
+```
+
+This command:
+1. Starts the necessary Docker containers for testing
+2. Sets up the testing database
+3. Runs the necessary migrations
+
+## Running Specific Tests
+
+### ❌ INCORRECT way (doesn't work as expected)
+
+```bash
+# This does NOT run the specific file
+pnpm run test:api -- -t ./src/modules/user-medication/user-medication.controller.spec.ts
+```
+
+**Problem:** The `-t` argument filters by **test name**, not by file. Jest looks for tests that contain that string in their name.
+
+### ✅ CORRECT ways
+
+#### 1. File name without extension (Recommended)
+```bash
+# From apps/api/
+pnpm run test:api -- user-medication.controller
+```
+
+#### 2. File pattern with wildcards
+```bash
+# From apps/api/
+pnpm run test:api -- "**/user-medication.controller.spec.ts"
+```
+
+#### 3. Filter by specific test name
+```bash
+# Run only tests that contain "should reject when user is not authenticated"
+pnpm run test:api -- -t "should reject when user is not authenticated"
+```
+
+## Available Testing Commands
+
+### From apps/api/
+```bash
+# Run all tests
+pnpm run test:api
+
+# Run tests in watch mode
+pnpm run test:watch
+
+# Run tests with coverage
+pnpm run test:cov
+
+# Run tests in debug mode
+pnpm run test:debug
+```
+
+### From the project root
+```bash
+# Testing setup
+turbo run test:e2e:setup
+
+# Run API tests
+turbo run test:api
+
+# Run API tests in CI
+turbo run test:api:ci
+```
+
+## Test Structure
+
+### Base Configuration
+Tests follow this structure:
+
+```typescript
+describe('ControllerName', () => {
+  const testHelper = createTestSuiteWithAuth([AppModule]);
+
+  // Tests here
+});
+```
+
+### Test Organization
+- Group tests by endpoint using `describe`
+- Use descriptive names with `test` (avoid `it`)
+- Follow AAA pattern (Arrange, Act, Assert)
+
+```
+apps/api/src/modules/
+├── module-name/
+│   ├── module-name.controller.spec.ts
+│   ├── module-name.service.spec.ts
+│   └── module-name.repository.spec.ts
+```
+
+## Testing Patterns
+
+### Test Helper
+All tests use `createTestSuiteWithAuth` to:
+- Set up the testing application
+- Provide database and JWT services
+- Handle authentication
+
+```typescript
+import { createTestSuiteWithAuth } from '../test/test.helper';
+
+describe('ModuleController', () => {
+  const testHelper = createTestSuiteWithAuth([AppModule]);
+  
+  test('should do something', async () => {
+    const app = testHelper.getApp();
+    const databaseService = testHelper.getDatabaseService();
+    const jwtService = testHelper.getJwtService();
+    // ... test implementation
+  });
+});
+```
+
+### Authentication and Authorization Tests
+
+```typescript
+test('should reject when user not have session', async () => {
+  const app = testHelper.getApp();
+  const response = await request(app.getHttpServer()).get('/endpoint').send({});
+
+  expect(response.status).toBe(401);
+  expect(response.body).toMatchObject({
+    code: 'unauthorized',
+    statusCode: 401,
+  });
+});
+```
+
+### Request Body Validation Tests
+
+```typescript
+test('should reject when body is invalid', async () => {
+  const app = testHelper.getApp();
+  const { generateToken } = await userFactory({
+    override: { role: Role.PATIENT },
+    jwtService: testHelper.getJwtService(),
+    databaseService: testHelper.getDatabaseService(),
+  });
+
+  const invalidBody = {
+    // Invalid data here
+  };
+
+  const response = await request(app.getHttpServer())
+    .post('/endpoint')
+    .set('Authorization', `Bearer ${generateToken()}`)
+    .send(invalidBody);
+
+  expect(response.status).toBe(400);
+  expect(response.body).toMatchObject({
+    code: 'validation_error',
+    statusCode: 400,
+  });
+});
+```
+
+### Pagination Tests
+
+```typescript
+test('should return paginated results', async () => {
+  const app = testHelper.getApp();
+  const databaseService = testHelper.getDatabaseService();
+
+  // Create multiple entities using factories
+  await Promise.all([
+    entityFactory({ databaseService }),
+    entityFactory({ databaseService }),
+    entityFactory({ databaseService }),
+  ]);
+
+  const response = await request(app.getHttpServer())
+    .get('/endpoint')
+    .query({ page: 1, limit: 10 });
+
+  expect(response.status).toBe(200);
+  expect(response.body).toMatchObject({
+    success: true,
+    data: {
+      data: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(Number),
+          uuid: expect.any(String),
+        }),
+      ]),
+      page: 1,
+      total: 3,
+      totalPages: 1,
+    },
+  });
+});
+```
+
+## Factories and Mocks
+
+### Factory Usage
+Location: `apps/api/src/modules/test/model.factory.ts`
+
+- Use `model.factory.ts` for creating test entities
+- Allow property overrides
+- Keep factories reusable and extensible
+- **Always create extra entities to verify query conditions**
+
+```typescript
+import { userFactory, medicationFactory } from '../test/model.factory';
+
+test('should create medication', async () => {
+  const { user } = await userFactory({ databaseService, jwtService });
+  const { medication } = await medicationFactory({ databaseService });
+  // ... test implementation
+});
+```
+
+Example for user-related queries:
+
+```typescript
+// Create main user for the test
+const { user, generateToken } = await userFactory({
+  databaseService,
+  override: { role: Role.PATIENT },
+});
+
+// Create additional users to verify query conditions
+await Promise.all([
+  userFactory({
+    databaseService,
+    override: { role: Role.PATIENT },
+  }),
+  userFactory({
+    databaseService,
+    override: { role: Role.DOCTOR },
+  }),
+]);
+
+// Verify query only returns correct user's data
+const response = await request(app.getHttpServer())
+  .get(`/user/${user.id}/data`)
+  .set('Authorization', `Bearer ${generateToken()}`);
+
+expect(response.body.data).toHaveLength(1);
+expect(response.body.data[0].userId).toBe(user.id);
+```
+
+### Mocks
+Location: `apps/api/src/modules/test/model.mocks.ts`
+
+- Use `faker` for random data
+- Create helper functions for specific data types
+
+```typescript
+const randomPassword = () => {
+  const lowercase = faker.string.alpha({ length: 3, casing: 'lower' });
+  const uppercase = faker.string.alpha({ length: 3, casing: 'upper' });
+  const numbers = faker.string.numeric(2);
+  const special = '@$!%*?&'[faker.number.int({ min: 0, max: 6 })];
+  return faker.helpers.shuffle(combined.split('')).join('');
+};
+```
+
+## Assertions
+
+### Common Patterns
+- Use `toMatchObject` for partial objects
+- Use `expect.any()` for dynamic values
+- Use `expect.arrayContaining()` for arrays
+- Validate HTTP status codes
+- Validate response structure
+
+### Examples
+
+```typescript
+expect(response.body).toMatchObject({
+  success: true,
+  data: {
+    id: expect.any(Number),
+    uuid: expect.any(String),
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+  },
+});
+```
+
+## Event Handling
+
+### Event Tests
+- Verify event publication
+- Validate event payload
+- Check event state in database
+- Create related entities to verify event conditions
+
+```typescript
+// Create main entity
+const { user } = await userFactory({
+  databaseService,
+  override: { role: Role.PATIENT },
+});
+
+// Create additional entities to verify event conditions
+await Promise.all([userFactory({ databaseService }), userFactory({ databaseService })]);
+
+const event = await databaseService.event.findFirst({
+  where: {
+    type: 'EVENT_TYPE',
+    createdBy: { id: user.id },
+  },
+});
+
+expect(event).toBeTruthy();
+expect(event.payload).toMatchObject({
+  // Expected payload
+});
+```
+
+## Database Integration
+
+### CRUD Operations
+- Verify entity creation
+- Validate updates
+- Check logical deletions
+- Verify relationships
+- **Always create extra entities to verify query conditions**
+
+### Query Conditions
+When testing queries related to User or any other model:
+
+1. Create the main entity for the test
+2. Create additional entities with different properties
+3. Verify the query only returns the expected data
+4. Check that the `where` conditions are working correctly
+
+Example:
+
+```typescript
+// Create main user
+const { user } = await userFactory({
+  databaseService,
+  override: { role: Role.PATIENT },
+});
+
+// Create additional users with different roles
+await Promise.all([
+  userFactory({
+    databaseService,
+    override: { role: Role.DOCTOR },
+  }),
+  userFactory({
+    databaseService,
+    override: { role: Role.ADMIN },
+  }),
+]);
+
+// Verify query only returns patient users
+const response = await request(app.getHttpServer()).get('/users').query({ role: Role.PATIENT });
+
+expect(response.body.data).toHaveLength(1);
+expect(response.body.data[0].id).toBe(user.id);
+```
+
+## Best Practices
+
+### Database Management
+- Use `TestHelper` for database cleanup (`test.helper.ts`)
+- No need to manually handle `beforeEach` or `afterAll` for cleanup
+- Keep tests independent
+
+### Organization
+- Group related tests
+- Use descriptive names
+- Document complex test cases
+- **Always test query conditions with extra entities**
+
+### Code Reuse
+- Create helpers for common operations
+- Keep factories updated
+- Share common configurations
+
+## Security Considerations
+
+### Authentication
+- Test endpoints without authentication
+- Test with different roles
+- Validate expired tokens
+
+### Validation
+- Test data limits
+- Validate specific formats
+- Test edge cases
+
+1. **Testing data**: Never use real data in tests
+2. **Separate database**: Tests use a separate testing database
+3. **Cleanup**: Tests automatically clean up data after execution
+4. **Environment variables**: Use `.env.testing` for configuration
+
+## Edge Cases
+
+1. **Tests that fail unexpectedly**: Verify that `turbo run test:e2e:setup` ran correctly
+2. **Timezone issues**: Use fixed dates in UTC for tests involving timezones
+3. **Tests that run incorrect files**: Use the complete file path instead of `-t`
+
+## Debugging
+
+### View detailed logs
+```bash
+pnpm run test:api -- --verbose
+```
+
+### Run a specific test in debug mode
+```bash
+pnpm run test:api -- --runInBand --detectOpenHandles user-medication.controller
+```
+
+### View Jest configuration
+```bash
+pnpm run test:api -- --showConfig
+```
+
+## Jest Configuration
+
+The Jest configuration is in `apps/api/test/jest.json`:
+
+```json
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "testEnvironment": "node",
+  "rootDir": "../src",
+  "testRegex": ".*\\.spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/../src/$1",
+    "^src/(.*)$": "<rootDir>/$1"
+  },
+  "setupFiles": ["dotenv/config"],
+  "testTimeout": 10000
+}
+```
+
+## Important Files
+
+### Test Helpers
+- `apps/api/src/modules/test/test.helper.ts`: Main test helper with database management
+- `apps/api/src/modules/test/model.factory.ts`: Entity factories
+- `apps/api/src/modules/test/model.mocks.ts`: Mock data generators
+
+### Database Schema
+- `packages/database/prisma/schema.prisma`: Database schema reference
+
+1. **Datos de testing**: Nunca usar datos reales en tests
+2. **Base de datos separada**: Los tests usan una base de datos de testing separada
+3. **Cleanup**: Los tests limpian automáticamente los datos después de ejecutarse
+4. **Variables de entorno**: Usar `.env.testing` para configu
