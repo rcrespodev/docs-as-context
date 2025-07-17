@@ -78,6 +78,7 @@ The following features are required for [Project Name]:
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 - [ ] [Criterion 3]
+**State**: [Draft / In Progress / Completed]
 
 **Technical Requirements**:
 - [Requirement 1]
@@ -92,6 +93,7 @@ The following features are required for [Project Name]:
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 - [ ] [Criterion 3]
+**State**: [Draft / In Progress / Completed]
 
 **Technical Requirements**:
 - [Requirement 1]
@@ -106,7 +108,8 @@ The following features are required for [Project Name]:
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 - [ ] [Criterion 3]
-
+**State**: [Draft / In Progress / Completed]
+    
 **Technical Requirements**:
 - [Requirement 1]
 - [Requirement 2]
